@@ -1,6 +1,6 @@
 import { EventInput } from '@fullcalendar/core';
 
-export function generateRecurringEvents(
+export function generateRecurringWeeklyEvents(
     recurringTitle: string,
     startRecur: string,
     endRecur: string,
@@ -42,3 +42,12 @@ export function generateRecurringEvents(
     
     return newEvents;
 };
+
+export function generateRecurringRelativeDate(
+    relativeDate: Date,
+    offset: number
+): Date {
+    relativeDate.setUTCDate(relativeDate.getUTCDate() + offset)
+    console.log("RelativeDate", relativeDate)
+    return relativeDate
+}

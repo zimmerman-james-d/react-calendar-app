@@ -44,7 +44,11 @@ export function Sidebar({
                 </CollapsibleSection>
 
                 <CollapsibleSection title="Recurring Event">
-                    <RecurringEventForm onAddEvent={onAddEvent} />
+                    <RecurringEventForm 
+                        onAddEvent={onAddEvent}
+                        events={events}
+                        startDate={startDate}
+                    />
                 </CollapsibleSection>
 
                 <CollapsibleSection title="All Events">

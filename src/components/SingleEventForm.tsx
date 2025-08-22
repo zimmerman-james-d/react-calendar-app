@@ -58,7 +58,6 @@ export function SingleEventForm({ onAddEvent, events, startDate }: SingleEventFo
             } else if (relativeDirection === 'before') {
                 baseDate.setUTCDate(baseDate.getUTCDate() - relativeOffset);
             }
-
             eventDate = baseDate.toISOString().split('T')[0];
         }
 
