@@ -43,11 +43,12 @@ export function generateRecurringWeeklyEvents(
     return newEvents;
 };
 
+// This function now returns a new Date object instead of modifying the original
 export function generateRecurringRelativeDate(
     relativeDate: Date,
     offset: number
 ): Date {
-    relativeDate.setUTCDate(relativeDate.getUTCDate() + offset)
-    console.log("RelativeDate", relativeDate)
-    return relativeDate
+    const newDate = new Date(relativeDate.getTime());
+    newDate.setUTCDate(newDate.getUTCDate() + offset);
+    return newDate;
 }

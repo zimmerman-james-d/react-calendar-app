@@ -1,4 +1,4 @@
-import { generateRecurringWeeklyEvents } from '../src/utils/eventUtils';
+import { generateRecurringWeeklyEvents, generateRecurringRelativeDate } from '../src/utils/eventUtils';
 
 describe('generateRecurringWeeklyEvents', () => {
   it('should generate a simple weekly schedule correctly', () => {
@@ -24,4 +24,24 @@ describe('generateRecurringWeeklyEvents', () => {
     const expectedDates = ['2024-02-18', '2024-03-07'];
     expect(events.map(e => e.date)).toEqual(expectedDates);
   });
+});
+
+describe('generateRecurringRelativeDate', () => {
+    it('should correctly add a positive offset to a date', () => {
+        const baseDate = new Date(Date.UTC(2025, 9, 15)); // Oct 15, 2025
+        const newDate = generateRecurringRelativeDate(baseDate, 5);
+        expect(newDate.toISOString().split('T')[0]).toBe('2025-10-20');
+    });
+
+    it('should correctly apply a negative offset to a date', () => {
+        const baseDate = new Date(Date.UTC(2025, 9, 15));
+        const newDate = generateRecurringRelativeDate(baseDate, -3);
+        expect(newDate.toISOString().split('T')[0]).toBe('2025-10-12');
+    });
+
+    it('should return the same date for a zero offset', () => {
+        const baseDate = new Date(Date.UTC(2025, 9, 15));
+        const newDate = generateRecurringRelativeDate(baseDate, 0);
+        expect(newDate.toISOString().split('T')[0]).toBe('2025-10-15');
+    });
 });

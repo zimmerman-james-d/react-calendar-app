@@ -4,7 +4,6 @@ import { generateRecurringWeeklyEvents, generateRecurringRelativeDate } from '..
 
 interface RecurringEventFormProps {
     onAddEvent: (events: EventInput[]) => void;
-    // Add events and startDate to props to populate the target dropdown
     events: EventInput[];
     startDate: string;
 }
@@ -66,7 +65,6 @@ export function RecurringEventForm({ onAddEvent, events, startDate }: RecurringE
             }
             onAddEvent(newEvents);
         } else if (dateType === 'relative') {
-            console.log('Relative Date')
             const newEvents: EventInput[] = [];
 
             if (!relativeTargetEventKey) {
@@ -87,20 +85,19 @@ export function RecurringEventForm({ onAddEvent, events, startDate }: RecurringE
             }
 
             const [targetYear, targetMonth, targetDay] = targetDateStr.split('-').map(Number);
-            const baseDate = new Date(Date.UTC(targetYear, targetMonth - 1, targetDay));
-            const beforeDate = new Date(Date.UTC(targetYear, targetMonth - 1, targetDay));
-            const afterDate = new Date(Date.UTC(targetYear, targetMonth - 1, targetDay));
-            console.log(daysBefore, daysAfter)
+            
             if (isDaysBeforeEnabled) {
+                const beforeDate = new Date(Date.UTC(targetYear, targetMonth - 1, targetDay));
                 newEvents.push({ title: title, date: generateRecurringRelativeDate(beforeDate, daysBefore * -1).toISOString().split('T')[0] })
             }
             if (isDaysAfterEnabled) {
+                const afterDate = new Date(Date.UTC(targetYear, targetMonth - 1, targetDay));
                 newEvents.push({ title: title, date: generateRecurringRelativeDate(afterDate, daysAfter).toISOString().split('T')[0] })
             }
             if (isDayOfEnabled) {
+                const baseDate = new Date(Date.UTC(targetYear, targetMonth - 1, targetDay));
                 newEvents.push({ title: title, date: baseDate.toISOString().split('T')[0] })
             }
-            console.log(newEvents)
             onAddEvent(newEvents);
         }
 
@@ -165,15 +162,14 @@ export function RecurringEventForm({ onAddEvent, events, startDate }: RecurringE
             {dateType === 'relative' && (
                 <>
                     <div className="form-group">
-                        <label>Relative To</label>
-                        <select className="relative-target-select" value={relativeTargetEventKey} onChange={(e) => setRelativeTargetEventKey(e.target.value)}>
+                        <label htmlFor="relative-target-select">Relative To</label>
+                        <select id="relative-target-select" className="relative-target-select" value={relativeTargetEventKey} onChange={(e) => setRelativeTargetEventKey(e.target.value)}>
                             <option value="">Select an event...</option>
                             {startDate && (
                                 <option value="start-date">
                                     Start Date ({startDate})
                                 </option>
                             )}
-                            {/* This will need to be updated to show event series, not individual events */}
                             {events.map((event, index) => (
                                 <option key={index} value={`${event.title}-${event.date}`}>
                                     {event.title} ({event.date?.toString()})
