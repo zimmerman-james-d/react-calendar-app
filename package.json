@@ -1,6 +1,6 @@
 {
-  "name": "Personal",
-  "version": "1.0.0",
+  "name": "React Calendar",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -29,6 +29,7 @@
     "@types/jest": "^29.5.12",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "copyfiles": "^2.4.1",
     "cpy": "^11.0.0",
     "esbuild-plugin-postcss2": "^0.1.2",
     "identity-obj-proxy": "^3.0.0",
