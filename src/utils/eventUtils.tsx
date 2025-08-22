@@ -1,6 +1,6 @@
 import { EventInput } from '@fullcalendar/core';
 
-export function generateRecurringEvents(
+export function generateRecurringWeeklyEvents(
     recurringTitle: string,
     startRecur: string,
     endRecur: string,
@@ -42,3 +42,13 @@ export function generateRecurringEvents(
     
     return newEvents;
 };
+
+// This function now returns a new Date object instead of modifying the original
+export function generateRecurringRelativeDate(
+    relativeDate: Date,
+    offset: number
+): Date {
+    const newDate = new Date(relativeDate.getTime());
+    newDate.setUTCDate(newDate.getUTCDate() + offset);
+    return newDate;
+}

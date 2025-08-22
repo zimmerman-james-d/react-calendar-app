@@ -228,7 +228,7 @@
   color: #777;
 }
 
-/* --- New Relative Date Styles --- */
+/* --- Relative Date Styles --- */
 .relative-date-controls {
   display: flex;
   gap: 10px;
@@ -245,4 +245,21 @@
 
 .relative-target-select {
   width: 100%;
+}
+
+/* --- Relative Option Group Styles --- */
+.relative-option-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.relative-option-group input[type="number"] {
+    width: 70px;
+}
+
+.relative-option-group label {
+    margin-bottom: 0; /* Override default form-group label margin */
+    font-weight: normal;
 }
