@@ -4,11 +4,13 @@ import { CollapsibleSection } from './components/CollapsibleSection';
 import { SingleEventForm } from './components/SingleEventForm';
 import { RecurringEventForm } from './components/RecurringEventForm';
 import { EventList } from './components/EventList';
+import { EventDefinition } from './types';
 
 interface SidebarProps {
     isOpen: boolean;
     toggleSidebar: () => void;
-    onAddEvent: (event: EventInput | EventInput[]) => void;
+    onAddEventDefinition: (definition: EventDefinition) => void;
+    eventDefinitions: EventDefinition[];
     events: EventInput[];
     startDate: string;
     onStartDateChange: (date: string) => void;
@@ -17,7 +19,8 @@ interface SidebarProps {
 export function Sidebar({ 
     isOpen, 
     toggleSidebar, 
-    onAddEvent, 
+    onAddEventDefinition,
+    eventDefinitions,
     events, 
     startDate, 
     onStartDateChange 
@@ -37,7 +40,7 @@ export function Sidebar({
 
                 <CollapsibleSection title="Single Event" initialOpen={true}>
                     <SingleEventForm 
-                        onAddEvent={onAddEvent}
+                        onAddEventDefinition={onAddEventDefinition}
                         events={events}
                         startDate={startDate}
                     />
@@ -45,9 +48,8 @@ export function Sidebar({
 
                 <CollapsibleSection title="Recurring Event">
                     <RecurringEventForm 
-                        onAddEvent={onAddEvent}
-                        events={events}
-                        startDate={startDate}
+                        onAddEventDefinition={onAddEventDefinition}
+                        eventDefinitions={eventDefinitions}
                     />
                 </CollapsibleSection>
 

@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { EventInput } from '@fullcalendar/core';
-import { generateRecurringWeeklyEvents, generateRecurringRelativeDate } from '../utils/eventUtils';
+import { EventDefinition } from '../types';
 
 interface RecurringEventFormProps {
-    onAddEvent: (events: EventInput[]) => void;
-    events: EventInput[];
-    startDate: string;
+    onAddEventDefinition: (definition: EventDefinition) => void;
+    eventDefinitions: EventDefinition[];
 }
 
 const daysOfWeek = [
@@ -13,7 +11,7 @@ const daysOfWeek = [
     { label: 'Thu', value: 4 }, { label: 'Fri', value: 5 }, { label: 'Sat', value: 6 }
 ];
 
-export function RecurringEventForm({ onAddEvent, events, startDate }: RecurringEventFormProps) {
+export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: RecurringEventFormProps) {
     const [title, setTitle] = useState('');
     const [startRecur, setStartRecur] = useState('');
     const [endRecur, setEndRecur] = useState('');
@@ -26,14 +24,10 @@ export function RecurringEventForm({ onAddEvent, events, startDate }: RecurringE
     const [isDaysAfterEnabled, setIsDaysAfterEnabled] = useState(false);
     const [daysAfter, setDaysAfter] = useState(1);
     const [isDayOfEnabled, setIsDayOfEnabled] = useState(false);
-    const [relativeTargetEventKey, setRelativeTargetEventKey] = useState<string>('');
-
+    const [relativeTargetGroupId, setRelativeTargetGroupId] = useState<string>('');
 
     useEffect(() => {
-        setWeeklySelections(currentSelections => {
-            const newSelections = Array.from({ length: recurrenceCycle }, (_, i) => currentSelections[i] || []);
-            return newSelections;
-        });
+        setWeeklySelections(currentSelections => Array.from({ length: recurrenceCycle }, (_, i) => currentSelections[i] || []));
     }, [recurrenceCycle]);
 
     const handleDayToggle = (dayValue: number, weekIndex: number) => {
@@ -50,61 +44,55 @@ export function RecurringEventForm({ onAddEvent, events, startDate }: RecurringE
     };
 
     const handleSave = () => {
+        if (!title) {
+            alert('Please enter a title');
+            return;
+        }
+
+        const newDefinition: Partial<EventDefinition> = {
+            id: crypto.randomUUID(),
+            groupId: crypto.randomUUID(),
+            title,
+        };
+
         if (dateType === 'specific') {
-            const newEvents = generateRecurringWeeklyEvents(
-                title,
+            if (!startRecur || !endRecur || weeklySelections.every(w => w.length === 0)) {
+                alert('Please fill out all fields for the recurrence.');
+                return;
+            }
+            newDefinition.recurrence = {
                 startRecur,
                 endRecur,
                 weeklySelections,
-                recurrenceCycle
-            );
-
-            if (newEvents.length === 0) {
-                alert('Please fill out all fields and select at least one day.');
-                return;
-            }
-            onAddEvent(newEvents);
+                recurrenceCycle,
+            };
         } else if (dateType === 'relative') {
-            const newEvents: EventInput[] = [];
-
-            if (!relativeTargetEventKey) {
-                alert('Please select a target event.');
+            if (!relativeTargetGroupId) {
+                alert('Please select a target recurring event.');
                 return;
             }
-            let targetDateStr: string | undefined;
-
-            if (relativeTargetEventKey === 'start-date') {
-                targetDateStr = startDate;
-            } else {
-                const targetEvent = events.find(e => `${e.title}-${e.date}` === relativeTargetEventKey);
-                targetDateStr = targetEvent?.date?.toString();
-            }
-            if (!targetDateStr) {
-                alert('Target event not found or has no date.');
-                return;
-            }
-
-            const [targetYear, targetMonth, targetDay] = targetDateStr.split('-').map(Number);
-            
-            if (isDaysBeforeEnabled) {
-                const beforeDate = new Date(Date.UTC(targetYear, targetMonth - 1, targetDay));
-                newEvents.push({ title: title, date: generateRecurringRelativeDate(beforeDate, daysBefore * -1).toISOString().split('T')[0] })
-            }
-            if (isDaysAfterEnabled) {
-                const afterDate = new Date(Date.UTC(targetYear, targetMonth - 1, targetDay));
-                newEvents.push({ title: title, date: generateRecurringRelativeDate(afterDate, daysAfter).toISOString().split('T')[0] })
-            }
-            if (isDayOfEnabled) {
-                const baseDate = new Date(Date.UTC(targetYear, targetMonth - 1, targetDay));
-                newEvents.push({ title: title, date: baseDate.toISOString().split('T')[0] })
-            }
-            onAddEvent(newEvents);
+            newDefinition.relativeRecurrence = {
+                targetGroupId: relativeTargetGroupId,
+                daysBefore: isDaysBeforeEnabled,
+                beforeOffset: daysBefore,
+                daysAfter: isDaysAfterEnabled,
+                afterOffset: daysAfter,
+                dayOf: isDayOfEnabled,
+            };
         }
 
+        onAddEventDefinition(newDefinition as EventDefinition);
+        // Reset form state
         setTitle('');
-        setWeeklySelections(Array.from({ length: recurrenceCycle }, () => []));
         setStartRecur('');
         setEndRecur('');
+        setWeeklySelections(Array.from({ length: recurrenceCycle }, () => []));
+        setRelativeTargetGroupId('');
+        setIsDaysBeforeEnabled(false);
+        setIsDaysAfterEnabled(false);
+        setIsDayOfEnabled(false);
+        setDaysBefore(1);
+        setDaysAfter(1);
     };
 
     return (
@@ -113,7 +101,6 @@ export function RecurringEventForm({ onAddEvent, events, startDate }: RecurringE
                 <label htmlFor="recurring-title">Event Name</label>
                 <input type="text" id="recurring-title" value={title} onChange={(e) => setTitle(e.target.value)} />
             </div>
-
             <div className="form-group">
                 <label htmlFor="recurring-date-type">Date Type</label>
                 <select id="recurring-date-type" value={dateType} onChange={(e) => setDateType(e.target.value)}>
@@ -121,7 +108,6 @@ export function RecurringEventForm({ onAddEvent, events, startDate }: RecurringE
                     <option value="relative">Relative to another event</option>
                 </select>
             </div>
-
             {dateType === 'specific' && (
                 <>
                     <div className="form-group">
@@ -138,9 +124,9 @@ export function RecurringEventForm({ onAddEvent, events, startDate }: RecurringE
                             <label>Week {index + 1} Repeats On</label>
                             <div className="day-picker">
                                 {daysOfWeek.map(day => (
-                                    <button
-                                        key={day.value}
-                                        className={`day-button ${weeklySelections[index]?.includes(day.value) ? 'selected' : ''}`}
+                                    <button 
+                                        key={day.value} 
+                                        className={`day-button ${weeklySelections[index]?.includes(day.value) ? 'selected' : ''}`} 
                                         onClick={() => handleDayToggle(day.value, index)}>
                                         {day.label}
                                     </button>
@@ -158,21 +144,15 @@ export function RecurringEventForm({ onAddEvent, events, startDate }: RecurringE
                     </div>
                 </>
             )}
-
             {dateType === 'relative' && (
-                <>
+                 <>
                     <div className="form-group">
-                        <label htmlFor="relative-target-select">Relative To</label>
-                        <select id="relative-target-select" className="relative-target-select" value={relativeTargetEventKey} onChange={(e) => setRelativeTargetEventKey(e.target.value)}>
-                            <option value="">Select an event...</option>
-                            {startDate && (
-                                <option value="start-date">
-                                    Start Date ({startDate})
-                                </option>
-                            )}
-                            {events.map((event, index) => (
-                                <option key={index} value={`${event.title}-${event.date}`}>
-                                    {event.title} ({event.date?.toString()})
+                        <label htmlFor="relative-target-group">Relative To</label>
+                        <select id="relative-target-group" className="relative-target-select" value={relativeTargetGroupId} onChange={(e) => setRelativeTargetGroupId(e.target.value)}>
+                            <option value="">Select a recurring event...</option>
+                            {eventDefinitions.filter(def => def.recurrence).map((def) => (
+                                <option key={def.id} value={def.groupId}>
+                                    {def.title}
                                 </option>
                             ))}
                         </select>
@@ -193,7 +173,6 @@ export function RecurringEventForm({ onAddEvent, events, startDate }: RecurringE
                     </div>
                 </>
             )}
-
             <button onClick={handleSave} className="save-event-button">Add Recurring Event</button>
         </>
     );

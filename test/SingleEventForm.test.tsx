@@ -1,18 +1,19 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { SingleEventForm } from '../src/components/SingleEventForm';
 import { EventInput } from '@fullcalendar/core';
 
 describe('SingleEventForm Component', () => {
-  const mockOnAddEvent = jest.fn();
+  const mockOnAddEventDefinition = jest.fn();
+  // The events passed in now need an ID to be selectable
   const mockEvents: EventInput[] = [
-    { title: 'Existing Event', date: '2025-10-15' }
+    { id: 'evt-1', title: 'Existing Event', date: '2025-10-15' }
   ];
 
   const renderForm = (props = {}) => {
     const defaultProps = {
-      onAddEvent: mockOnAddEvent,
+      onAddEventDefinition: mockOnAddEventDefinition,
       events: mockEvents,
       startDate: '2025-10-01',
     };
@@ -20,37 +21,47 @@ describe('SingleEventForm Component', () => {
   };
 
   beforeEach(() => {
-    mockOnAddEvent.mockClear();
+    mockOnAddEventDefinition.mockClear();
   });
 
-  it('should create a single event with a specific date', () => {
+  it('should create a specific date event definition', () => {
     renderForm();
     
-    fireEvent.change(screen.getByLabelText('Event Name'), { target: { value: 'Specific Date Event' } });
+    fireEvent.change(screen.getByLabelText('Event Name'), { target: { value: 'Specific Test' } });
     fireEvent.change(screen.getByLabelText('Date'), { target: { value: '2025-10-20' } });
     fireEvent.click(screen.getByText('Add Event'));
 
-    expect(mockOnAddEvent).toHaveBeenCalledWith({
-      title: 'Specific Date Event',
-      date: '2025-10-20',
-    });
+    expect(mockOnAddEventDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Specific Test',
+        date: '2025-10-20',
+      })
+    );
   });
 
-  it('should create a relative event after the main start date', () => {
+  it('should create a relative event definition based on an existing event', () => {
     renderForm();
 
     fireEvent.change(screen.getByLabelText('Date Type'), { target: { value: 'relative' } });
-    fireEvent.change(screen.getByLabelText('Event Name'), { target: { value: 'Relative After Start' } });
+    fireEvent.change(screen.getByLabelText('Event Name'), { target: { value: 'Relative Test' } });
     
-    fireEvent.change(screen.getByDisplayValue('Select an event...'), { target: { value: 'start-date' } });
-    fireEvent.change(screen.getByDisplayValue('1'), { target: { value: '10' } });
-    fireEvent.change(screen.getByDisplayValue('Days After'), { target: { value: 'after' } });
+    // Select the existing event from the dropdown
+    fireEvent.change(screen.getByDisplayValue('Select an event...'), { target: { value: 'evt-1' } });
+    
+    // Set offset to 5 days before
+    fireEvent.change(screen.getByDisplayValue('1'), { target: { value: '5' } });
+    fireEvent.change(screen.getByDisplayValue('Days After'), { target: { value: 'before' } });
     
     fireEvent.click(screen.getByText('Add Event'));
 
-    expect(mockOnAddEvent).toHaveBeenCalledWith({
-      title: 'Relative After Start',
-      date: '2025-10-11',
-    });
+    expect(mockOnAddEventDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Relative Test',
+        relativeTo: {
+          targetId: 'evt-1',
+          offset: -5,
+        },
+      })
+    );
   });
 });

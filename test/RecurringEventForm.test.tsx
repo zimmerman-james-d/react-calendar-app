@@ -2,67 +2,65 @@ import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { RecurringEventForm } from '../src/components/RecurringEventForm';
-import { EventInput } from '@fullcalendar/core';
+import { EventDefinition } from '../src/types';
 
 describe('RecurringEventForm Component', () => {
-  const mockOnAddEvent = jest.fn();
-  const mockEvents: EventInput[] = [
-    { title: 'Existing Event', date: '2025-10-20' }
+  const mockOnAddEventDefinition = jest.fn();
+  const mockEventDefinitions: EventDefinition[] = [
+    {
+      id: 'def-1',
+      groupId: 'group-1',
+      title: 'Base Recurring Event',
+      recurrence: {
+        startRecur: '2025-10-01',
+        endRecur: '2025-10-31',
+        weeklySelections: [[1]], // Mondays
+        recurrenceCycle: 1,
+      },
+    }
   ];
 
   const renderForm = (props = {}) => {
     const defaultProps = {
-      onAddEvent: mockOnAddEvent,
-      events: mockEvents,
-      startDate: '2025-10-01',
+      onAddEventDefinition: mockOnAddEventDefinition,
+      eventDefinitions: mockEventDefinitions,
     };
     return render(<RecurringEventForm {...defaultProps} {...props} />);
   };
 
   beforeEach(() => {
-    mockOnAddEvent.mockClear();
+    mockOnAddEventDefinition.mockClear();
   });
 
-  it('should create relative events for all three enabled options', () => {
+  it('should create a relative recurring event definition', () => {
     renderForm();
-
-    // Switch to relative date type
+    
     fireEvent.change(screen.getByLabelText('Date Type'), { target: { value: 'relative' } });
-    fireEvent.change(screen.getByLabelText('Event Name'), { target: { value: 'Test Relative' } });
+    fireEvent.change(screen.getByLabelText('Event Name'), { target: { value: 'Relative Follow-up' } });
 
-    // Select the target event
-    const targetEventKey = `${mockEvents[0].title}-${mockEvents[0].date}`;
-    fireEvent.change(screen.getByLabelText('Relative To'), { target: { value: targetEventKey } });
-
-    // Enable and configure "Days Before"
-    const daysBeforeGroup = screen.getByLabelText('Days Before').closest('.relative-option-group');
-    if (!(daysBeforeGroup instanceof HTMLElement)) throw new Error('Could not find "Days Before" group');
-    fireEvent.click(within(daysBeforeGroup).getByRole('checkbox'));
-    fireEvent.change(within(daysBeforeGroup).getByRole('spinbutton'), { target: { value: '5' } });
+    // Select the target recurring event series from the dropdown
+    fireEvent.change(screen.getByLabelText('Relative To'), { target: { value: 'group-1' } });
 
     // Enable and configure "Days After"
     const daysAfterGroup = screen.getByLabelText('Days After').closest('.relative-option-group');
     if (!(daysAfterGroup instanceof HTMLElement)) throw new Error('Could not find "Days After" group');
     fireEvent.click(within(daysAfterGroup).getByRole('checkbox'));
-    fireEvent.change(within(daysAfterGroup).getByRole('spinbutton'), { target: { value: '10' } });
+    fireEvent.change(within(daysAfterGroup).getByRole('spinbutton'), { target: { value: '2' } });
 
-    // Enable "Day Of"
-    const dayOfGroup = screen.getByLabelText('Day Of').closest('.relative-option-group');
-    if (!(dayOfGroup instanceof HTMLElement)) throw new Error('Could not find "Day Of" group');
-    fireEvent.click(within(dayOfGroup).getByRole('checkbox'));
-
-    // Save the event
     fireEvent.click(screen.getByText('Add Recurring Event'));
 
-    // Check that the correct events were created
-    // The order might vary depending on implementation, so we check the contents without order sensitivity.
-    expect(mockOnAddEvent).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({ title: 'Test Relative', date: '2025-10-15' }), // 20 - 5
-        expect.objectContaining({ title: 'Test Relative', date: '2025-10-30' }), // 20 + 10
-        expect.objectContaining({ title: 'Test Relative', date: '2025-10-20' })  // Day Of
-      ])
+    expect(mockOnAddEventDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Relative Follow-up',
+        relativeRecurrence: {
+          targetGroupId: 'group-1',
+          daysBefore: false,
+          beforeOffset: 1,
+          daysAfter: true,
+          afterOffset: 2,
+          dayOf: false,
+        },
+      })
     );
-    expect(mockOnAddEvent.mock.calls[0][0].length).toBe(3);
   });
 });
