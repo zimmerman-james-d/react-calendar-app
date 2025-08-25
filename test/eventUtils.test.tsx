@@ -1,4 +1,7 @@
 import { generateRecurringWeeklyEvents, generateRecurringRelativeDate } from '../src/utils/eventUtils';
+import { renderHook } from '@testing-library/react';
+import { useEventGenerator } from '../src/utils/eventUtils';
+import { EventDefinition } from '../src/types';
 
 describe('generateRecurringWeeklyEvents', () => {
   it('should generate a simple weekly schedule correctly', () => {
@@ -44,4 +47,134 @@ describe('generateRecurringRelativeDate', () => {
         const newDate = generateRecurringRelativeDate(baseDate, 0);
         expect(newDate.toISOString().split('T')[0]).toBe('2025-10-15');
     });
+});
+
+describe('useEventGenerator Hook', () => {
+  it('should return an empty array with no definitions', () => {
+    const { result } = renderHook(() => useEventGenerator([], ''));
+    expect(result.current).toEqual([]);
+  });
+
+  it('should generate a single, specific date event', () => {
+    const definitions: EventDefinition[] = [
+      { id: '1', title: 'Test Event', date: '2025-10-20' }
+    ];
+    const { result } = renderHook(() => useEventGenerator(definitions, ''));
+    expect(result.current).toEqual([
+      { id: '1', title: 'Test Event', date: '2025-10-20' }
+    ]);
+  });
+
+  it('should generate a standard weekly recurring event', () => {
+    const definitions: EventDefinition[] = [
+      {
+        id: 'def-1',
+        groupId: 'group-1',
+        title: 'Weekly Standup',
+        recurrence: {
+          startRecur: '2025-10-06',
+          endRecur: '2025-10-20',
+          weeklySelections: [[1]], // Mondays
+          recurrenceCycle: 1,
+        }
+      }
+    ];
+    const { result } = renderHook(() => useEventGenerator(definitions, ''));
+    expect(result.current.length).toBe(3);
+    expect(result.current.map(e => e.date)).toEqual(['2025-10-06', '2025-10-13', '2025-10-20']);
+  });
+
+  it('should generate an event relative to the start date', () => {
+    const definitions: EventDefinition[] = [
+      {
+        id: '2',
+        title: 'Follow-up',
+        relativeTo: { targetId: 'start-date', offset: 5 }
+      }
+    ];
+    const { result } = renderHook(() => useEventGenerator(definitions, '2025-10-01'));
+    expect(result.current[0].date).toBe('2025-10-06');
+  });
+
+  it('should generate an event relative to another event', () => {
+    const definitions: EventDefinition[] = [
+      { id: '1', title: 'Base Event', date: '2025-11-10' },
+      {
+        id: '2',
+        title: 'Relative Event',
+        relativeTo: { targetId: '1', offset: -3 }
+      }
+    ];
+    const { result } = renderHook(() => useEventGenerator(definitions, ''));
+    expect(result.current.find(e => e.id === '2')?.date).toBe('2025-11-07');
+  });
+
+  it('should generate a recurring series relative to another (days after)', () => {
+    const definitions: EventDefinition[] = [
+      {
+        id: 'def-1', groupId: 'group-1', title: 'Base Series',
+        recurrence: { startRecur: '2025-11-03', endRecur: '2025-11-17', weeklySelections: [[1]], recurrenceCycle: 1 }
+      },
+      {
+        id: 'def-2', groupId: 'group-2', title: 'Relative Series',
+        relativeRecurrence: { targetGroupId: 'group-1', daysAfter: true, afterOffset: 2, daysBefore: false, beforeOffset: 1, dayOf: false }
+      }
+    ];
+    const { result } = renderHook(() => useEventGenerator(definitions, ''));
+    const relativeEvents = result.current.filter(e => e.title === 'Relative Series');
+    expect(relativeEvents.length).toBe(3);
+    expect(relativeEvents.map(e => e.date)).toEqual(['2025-11-05', '2025-11-12', '2025-11-19']);
+  });
+
+  it('should generate a recurring series relative to another (days before)', () => {
+    const definitions: EventDefinition[] = [
+      {
+        id: 'def-1', groupId: 'group-1', title: 'Base Series',
+        recurrence: { startRecur: '2025-11-03', endRecur: '2025-11-17', weeklySelections: [[1]], recurrenceCycle: 1 }
+      },
+      {
+        id: 'def-2', groupId: 'group-2', title: 'Relative Series',
+        relativeRecurrence: { targetGroupId: 'group-1', daysBefore: true, beforeOffset: 3, daysAfter: false, afterOffset: 1, dayOf: false }
+      }
+    ];
+    const { result } = renderHook(() => useEventGenerator(definitions, ''));
+    const relativeEvents = result.current.filter(e => e.title === 'Relative Series');
+    expect(relativeEvents.length).toBe(3);
+    expect(relativeEvents.map(e => e.date)).toEqual(['2025-10-31', '2025-11-07', '2025-11-14']);
+  });
+
+  it('should generate a recurring series relative to another (day of)', () => {
+    const definitions: EventDefinition[] = [
+      {
+        id: 'def-1', groupId: 'group-1', title: 'Base Series',
+        recurrence: { startRecur: '2025-11-03', endRecur: '2025-11-17', weeklySelections: [[1]], recurrenceCycle: 1 }
+      },
+      {
+        id: 'def-2', groupId: 'group-2', title: 'Relative Series',
+        relativeRecurrence: { targetGroupId: 'group-1', dayOf: true, daysBefore: false, beforeOffset: 1, daysAfter: false, afterOffset: 1 }
+      }
+    ];
+    const { result } = renderHook(() => useEventGenerator(definitions, ''));
+    const relativeEvents = result.current.filter(e => e.title === 'Relative Series');
+    expect(relativeEvents.length).toBe(3);
+    expect(relativeEvents.map(e => e.date)).toEqual(['2025-11-03', '2025-11-10', '2025-11-17']);
+  });
+
+  it('should generate a recurring series with all three relative options enabled', () => {
+    const definitions: EventDefinition[] = [
+      {
+        id: 'def-1', groupId: 'group-1', title: 'Base Series',
+        recurrence: { startRecur: '2025-11-10', endRecur: '2025-11-10', weeklySelections: [[1]], recurrenceCycle: 1 }
+      },
+      {
+        id: 'def-2', groupId: 'group-2', title: 'Relative Series',
+        relativeRecurrence: { targetGroupId: 'group-1', dayOf: true, daysBefore: true, beforeOffset: 2, daysAfter: true, afterOffset: 3 }
+      }
+    ];
+    const { result } = renderHook(() => useEventGenerator(definitions, ''));
+    const relativeEvents = result.current.filter(e => e.title === 'Relative Series');
+    expect(relativeEvents.length).toBe(3);
+    const dates = relativeEvents.map(e => e.date).sort();
+    expect(dates).toEqual(['2025-11-08', '2025-11-10', '2025-11-13']);
+  });
 });

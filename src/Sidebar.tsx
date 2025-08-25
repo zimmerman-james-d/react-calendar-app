@@ -4,7 +4,7 @@ import { CollapsibleSection } from './components/CollapsibleSection';
 import { SingleEventForm } from './components/SingleEventForm';
 import { RecurringEventForm } from './components/RecurringEventForm';
 import { EventList } from './components/EventList';
-import { EventDefinition } from './types';
+import { EventDefinition } from '../types';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -54,7 +54,7 @@ export function Sidebar({
                 </CollapsibleSection>
 
                 <CollapsibleSection title="All Events">
-                    <EventList events={events} />
+                    <EventList eventDefinitions={eventDefinitions} />
                 </CollapsibleSection>
             </div>
             <button onClick={toggleSidebar} className="sidebar-toggle-button">{isOpen ? '‹' : '›'}</button>

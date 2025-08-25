@@ -218,6 +218,7 @@
   padding: 10px;
   border-radius: 4px;
   margin-bottom: 8px;
+  white-space: normal; /* Allow text to wrap inside list items */
 }
 
 .event-list-item strong {

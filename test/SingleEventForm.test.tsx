@@ -1,12 +1,12 @@
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { SingleEventForm } from '../src/components/SingleEventForm';
 import { EventInput } from '@fullcalendar/core';
+import { EventDefinition } from '../src/types';
 
 describe('SingleEventForm Component', () => {
   const mockOnAddEventDefinition = jest.fn();
-  // The events passed in now need an ID to be selectable
   const mockEvents: EventInput[] = [
     { id: 'evt-1', title: 'Existing Event', date: '2025-10-15' }
   ];
@@ -45,10 +45,8 @@ describe('SingleEventForm Component', () => {
     fireEvent.change(screen.getByLabelText('Date Type'), { target: { value: 'relative' } });
     fireEvent.change(screen.getByLabelText('Event Name'), { target: { value: 'Relative Test' } });
     
-    // Select the existing event from the dropdown
     fireEvent.change(screen.getByDisplayValue('Select an event...'), { target: { value: 'evt-1' } });
     
-    // Set offset to 5 days before
     fireEvent.change(screen.getByDisplayValue('1'), { target: { value: '5' } });
     fireEvent.change(screen.getByDisplayValue('Days After'), { target: { value: 'before' } });
     
