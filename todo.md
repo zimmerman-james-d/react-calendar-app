@@ -18,10 +18,5 @@
 
 - Google Calendar Export: Add a feature to export events directly to a user's Google Calendar.
 
-## Compliance & Security
-- Encryption: Implement encryption for the saved event data ("at rest").
-
-- HIPAA Analysis: Conduct a thorough analysis of the application's features and data handling to ensure it remains outside the scope of HIPAA regulations.
-
 ## UI/UX
 - Fix Choppy Calendar Resize: Smooth out the animation when the sidebar expands and collapses.
