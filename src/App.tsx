@@ -10,9 +10,9 @@ export function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [eventDefinitions, setEventDefinitions] = useState<EventDefinition[]>([]);
   const [startDate, setStartDate] = useState<string>('');
+  const [calendarName, setCalendarName] = useState<string>('');
   const calendarRef = useRef<FullCalendar>(null);
 
-  // Use the custom hook from its new location
   const calendarEvents = useEventGenerator(eventDefinitions, startDate);
 
   useEffect(() => {
@@ -29,16 +29,26 @@ export function App() {
     setEventDefinitions(prev => [...prev, newDefinition]);
   };
 
+  const handleLoad = (loadedData: { calendarName: string, startDate: string, eventDefinitions: EventDefinition[] }) => {
+    setCalendarName(loadedData.calendarName);
+    setStartDate(loadedData.startDate);
+    setEventDefinitions(loadedData.eventDefinitions);
+    alert("Schedule loaded successfully!");
+  };
+
   return (
     <div className="app-container">
       <Sidebar 
         isOpen={isSidebarOpen} 
         toggleSidebar={() => setSidebarOpen(!isSidebarOpen)}
         onAddEventDefinition={handleAddEventDefinition}
+        onLoad={handleLoad}
         eventDefinitions={eventDefinitions}
         events={calendarEvents}
         startDate={startDate}
         onStartDateChange={setStartDate}
+        calendarName={calendarName}
+        onCalendarNameChange={setCalendarName}
       />
       
       <div className="main-content">
