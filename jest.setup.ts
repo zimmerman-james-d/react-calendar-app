@@ -14,3 +14,11 @@ Object.defineProperty(self, 'Blob', {
     options,
   })),
 });
+
+// Mocks for URL methods used in saving files
+Object.defineProperty(self.URL, 'createObjectURL', {
+  value: jest.fn(() => 'mock-blob-url'),
+});
+Object.defineProperty(self.URL, 'revokeObjectURL', {
+  value: jest.fn(),
+});

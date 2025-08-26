@@ -277,7 +277,7 @@
     border-top: 2px solid #ddd;
     display: flex;
     gap: 10px;
-    flex-shrink: 0; /* Prevent this from shrinking */
+    flex-shrink: 0;
 }
 
 .save-button, .load-button {
@@ -311,4 +311,61 @@
 
 .fc-event-title {
   color: #000000 !important;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.password-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.modal-button.submit {
+  background-color: #2c3e50;
+  color: white;
+}
+
+.modal-button.cancel {
+  background-color: #e0e0e0;
 }

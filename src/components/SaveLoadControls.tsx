@@ -50,7 +50,7 @@ export function SaveLoadControls({ eventDefinitions, startDate, calendarName, on
     link.href = url;
     
     const fileName = createFileName(calendarName || 'calendar-schedule');
-    link.download = `${fileName}.json.encrypted`;
+    link.download = `${fileName}.tclx`;
 
     link.click();
     URL.revokeObjectURL(url);
@@ -111,7 +111,8 @@ export function SaveLoadControls({ eventDefinitions, startDate, calendarName, on
           ref={fileInputRef}
           onChange={handleFileChange}
           style={{ display: 'none' }}
-          accept=".encrypted"
+          accept=".tclx"
+          data-testid="load-file-input"
         />
       </div>
 
