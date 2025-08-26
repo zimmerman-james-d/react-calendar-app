@@ -14,8 +14,6 @@
 - Saving Holidays: Allow the user's custom holiday list to be saved and loaded.
 
 ## Data Management & Export
-- Saving & Loading: Implement functionality to save the entire event schedule to a file and load it back into the application.
-
 - iCal Export: Add a feature to export the event schedule to a standard .ics file.
 
 - Google Calendar Export: Add a feature to export events directly to a user's Google Calendar.
