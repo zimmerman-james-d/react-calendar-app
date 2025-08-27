@@ -5,7 +5,7 @@ import { SingleEventForm } from './components/SingleEventForm';
 import { RecurringEventForm } from './components/RecurringEventForm';
 import { EventList } from './components/EventList';
 import { SaveLoadControls } from './components/SaveLoadControls';
-import { EventDefinition } from '../types';
+import { EventDefinition } from './types';
 
 interface SidebarProps {
     isOpen: boolean;

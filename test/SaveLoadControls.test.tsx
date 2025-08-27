@@ -1,11 +1,11 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { SaveLoadControls } from '../src/components/SaveLoadControls';
 import { EventDefinition } from '../src/types';
 import CryptoJS from 'crypto-js';
 
-// Mock the EncryptionModal component to simulate user interaction
+// Mock the EncryptionModal component
 jest.mock('../src/components/EncryptionModal', () => ({
   EncryptionModal: ({ isOpen, onSubmit, onClose }: any) => {
     if (!isOpen) return null;
@@ -18,7 +18,7 @@ jest.mock('../src/components/EncryptionModal', () => ({
   },
 }));
 
-// Mock the crypto-js library to test our component's logic in isolation
+// Mock the crypto-js library
 jest.mock('crypto-js', () => ({
   AES: {
     encrypt: jest.fn((data, password) => ({
@@ -60,8 +60,11 @@ describe('SaveLoadControls Component with Encryption', () => {
     jest.clearAllMocks();
   });
 
-  it('should open the save modal and call the encryption function on save', () => {
+  it('should open the save modal and encrypt the data on save', () => {
     renderControls();
+    
+    // Spy on the anchor element's click method to prevent the navigation error
+    const linkClickMock = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
     fireEvent.click(screen.getByText('Save Calendar'));
     expect(screen.getByTestId('encryption-modal')).toBeInTheDocument();
@@ -75,9 +78,14 @@ describe('SaveLoadControls Component with Encryption', () => {
     });
     
     expect(CryptoJS.AES.encrypt).toHaveBeenCalledWith(expectedSaveData, 'password123');
+    // Verify that the download was triggered
+    expect(linkClickMock).toHaveBeenCalled();
+
+    // Clean up the spy
+    linkClickMock.mockRestore();
   });
 
-  it('should open the load modal and call the decryption function on load', async () => {
+  it('should open the load modal and decrypt the data on load', async () => {
     renderControls();
 
     const encryptedContent = `encrypted:${JSON.stringify({
@@ -91,7 +99,6 @@ describe('SaveLoadControls Component with Encryption', () => {
     const input = screen.getByTestId('load-file-input');
     fireEvent.change(input, { target: { files: [file] } });
 
-    // Wait for the modal to appear after the async file read
     await screen.findByTestId('encryption-modal');
 
     fireEvent.click(screen.getByText('Confirm'));
