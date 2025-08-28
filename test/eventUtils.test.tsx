@@ -117,7 +117,7 @@ describe('useEventGenerator Hook', () => {
       },
       {
         id: 'def-2', groupId: 'group-2', title: 'Relative Series',
-        relativeRecurrence: { targetGroupId: 'group-1', daysAfter: true, afterOffset: 2, daysBefore: false, beforeOffset: 1, dayOf: false }
+        relativeRecurrence: { targetGroupId: 'group-1', targetType: 'group', daysAfter: true, afterOffset: 2, daysBefore: false, beforeOffset: 1, dayOf: false }
       }
     ];
     const { result } = renderHook(() => useEventGenerator(definitions, ''));
@@ -134,7 +134,7 @@ describe('useEventGenerator Hook', () => {
       },
       {
         id: 'def-2', groupId: 'group-2', title: 'Relative Series',
-        relativeRecurrence: { targetGroupId: 'group-1', daysBefore: true, beforeOffset: 3, daysAfter: false, afterOffset: 1, dayOf: false }
+        relativeRecurrence: { targetGroupId: 'group-1', targetType: 'group', daysBefore: true, beforeOffset: 3, daysAfter: false, afterOffset: 1, dayOf: false }
       }
     ];
     const { result } = renderHook(() => useEventGenerator(definitions, ''));
@@ -151,7 +151,7 @@ describe('useEventGenerator Hook', () => {
       },
       {
         id: 'def-2', groupId: 'group-2', title: 'Relative Series',
-        relativeRecurrence: { targetGroupId: 'group-1', dayOf: true, daysBefore: false, beforeOffset: 1, daysAfter: false, afterOffset: 1 }
+        relativeRecurrence: { targetGroupId: 'group-1', targetType: 'group', dayOf: true, daysBefore: false, beforeOffset: 1, daysAfter: false, afterOffset: 1 }
       }
     ];
     const { result } = renderHook(() => useEventGenerator(definitions, ''));
@@ -168,7 +168,7 @@ describe('useEventGenerator Hook', () => {
       },
       {
         id: 'def-2', groupId: 'group-2', title: 'Relative Series',
-        relativeRecurrence: { targetGroupId: 'group-1', dayOf: true, daysBefore: true, beforeOffset: 2, daysAfter: true, afterOffset: 3 }
+        relativeRecurrence: { targetGroupId: 'group-1', targetType: 'group', dayOf: true, daysBefore: true, beforeOffset: 2, daysAfter: true, afterOffset: 3 }
       }
     ];
     const { result } = renderHook(() => useEventGenerator(definitions, ''));
@@ -176,5 +176,32 @@ describe('useEventGenerator Hook', () => {
     expect(relativeEvents.length).toBe(3);
     const dates = relativeEvents.map(e => e.date).sort();
     expect(dates).toEqual(['2025-11-08', '2025-11-10', '2025-11-13']);
+  });
+
+  it('should generate a recurring series relative to a single event (days after)', () => {
+    const definitions: EventDefinition[] = [
+      { id: 'single-1', title: 'Single Event', date: '2025-12-01' },
+      {
+        id: 'def-3', groupId: 'group-3', title: 'Relative to Single Series',
+        relativeRecurrence: { targetId: 'single-1', targetType: 'single', daysAfter: true, afterOffset: 5, daysBefore: false, beforeOffset: 1, dayOf: false }
+      }
+    ];
+    const { result } = renderHook(() => useEventGenerator(definitions, ''));
+    const relativeEvents = result.current.filter(e => e.title === 'Relative to Single Series');
+    expect(relativeEvents.length).toBe(1);
+    expect(relativeEvents.map(e => e.date)).toEqual(['2025-12-06']);
+  });
+
+  it('should generate a recurring series relative to the start date (days before and after)', () => {
+    const definitions: EventDefinition[] = [
+      {
+        id: 'def-4', groupId: 'group-4', title: 'Relative to Start Date Series',
+        relativeRecurrence: { targetId: 'start-date', targetType: 'single', daysBefore: true, beforeOffset: 10, daysAfter: true, afterOffset: 36, dayOf: false }
+      }
+    ];
+    const { result } = renderHook(() => useEventGenerator(definitions, '2025-01-15'));
+    const relativeEvents = result.current.filter(e => e.title === 'Relative to Start Date Series');
+    expect(relativeEvents.length).toBe(2);
+    expect(relativeEvents.map(e => e.date).sort()).toEqual(['2025-01-05', '2025-02-20']);
   });
 });

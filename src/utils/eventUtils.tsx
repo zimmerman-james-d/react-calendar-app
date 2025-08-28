@@ -97,7 +97,28 @@ export function useEventGenerator(eventDefinitions: EventDefinition[], startDate
             }
         }
         else if (def.relativeRecurrence) {
-            const targetInstances = generatedEvents.filter(e => e.groupId === def.relativeRecurrence!.targetGroupId);
+            let targetInstances: EventInput[] = [];
+            if (def.relativeRecurrence.targetType === 'group') {
+                targetInstances = generatedEvents.filter(e => e.groupId === def.relativeRecurrence!.targetGroupId);
+            } else if (def.relativeRecurrence.targetType === 'single') {
+                let singleTargetDate: Date | null = null;
+                if (def.relativeRecurrence.targetId === 'start-date') {
+                    if (startDate) {
+                        const [y, m, d] = startDate.split('-').map(Number);
+                        singleTargetDate = new Date(Date.UTC(y, m - 1, d));
+                    }
+                } else {
+                    const targetEvent = eventDefinitions.find(e => e.id === def.relativeRecurrence!.targetId);
+                    if (targetEvent?.date) {
+                        const [y, m, d] = targetEvent.date.split('-').map(Number);
+                        singleTargetDate = new Date(Date.UTC(y, m - 1, d));
+                    }
+                }
+                if (singleTargetDate) {
+                    targetInstances.push({ id: def.relativeRecurrence.targetId, date: singleTargetDate.toISOString().split('T')[0] });
+                }
+            }
+
             for (const instance of targetInstances) {
                 if (instance.date) {
                     const baseDate = new Date(instance.date.toString());

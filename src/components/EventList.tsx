@@ -28,8 +28,18 @@ function formatRecurrenceRule(definition: EventDefinition, allDefinitions: Event
     );
   }
   if (definition.relativeRecurrence) {
-    const targetDef = allDefinitions.find(d => d.groupId === definition.relativeRecurrence?.targetGroupId);
-    const targetTitle = targetDef ? `"${targetDef.title}"` : "another series";
+    let targetTitle = "";
+    if (definition.relativeRecurrence.targetType === 'group') {
+        const targetDef = allDefinitions.find(d => d.groupId === definition.relativeRecurrence?.targetGroupId);
+        targetTitle = targetDef ? `"${targetDef.title}"` : "another series";
+    } else if (definition.relativeRecurrence.targetType === 'single') {
+        if (definition.relativeRecurrence.targetId === 'start-date') {
+            targetTitle = "the Start Date";
+        } else {
+            const targetDef = allDefinitions.find(d => d.id === definition.relativeRecurrence?.targetId);
+            targetTitle = targetDef ? `"${targetDef.title}"` : "another event";
+        }
+    }
     
     const parts: string[] = [];
     if (definition.relativeRecurrence.daysBefore) {

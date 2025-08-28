@@ -25,10 +25,19 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
     const [daysAfter, setDaysAfter] = useState(1);
     const [isDayOfEnabled, setIsDayOfEnabled] = useState(false);
     const [relativeTargetGroupId, setRelativeTargetGroupId] = useState<string>('');
+    const [relativeTargetId, setRelativeTargetId] = useState<string>('');
 
     useEffect(() => {
         setWeeklySelections(currentSelections => Array.from({ length: recurrenceCycle }, (_, i) => currentSelections[i] || []));
     }, [recurrenceCycle]);
+
+    useEffect(() => {
+        if (dateType === 'relative-group') {
+            setRelativeTargetId('');
+        } else if (dateType === 'relative-single') {
+            setRelativeTargetGroupId('');
+        }
+    }, [dateType]);
 
     const handleDayToggle = (dayValue: number, weekIndex: number) => {
         setWeeklySelections(currentSelections => {
@@ -66,13 +75,28 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
                 weeklySelections,
                 recurrenceCycle,
             };
-        } else if (dateType === 'relative') {
+        } else if (dateType === 'relative-group') {
             if (!relativeTargetGroupId) {
                 alert('Please select a target recurring event.');
                 return;
             }
             newDefinition.relativeRecurrence = {
                 targetGroupId: relativeTargetGroupId,
+                targetType: 'group',
+                daysBefore: isDaysBeforeEnabled,
+                beforeOffset: daysBefore,
+                daysAfter: isDaysAfterEnabled,
+                afterOffset: daysAfter,
+                dayOf: isDayOfEnabled,
+            };
+        } else if (dateType === 'relative-single') {
+            if (!relativeTargetId) {
+                alert('Please select a target single event or start date.');
+                return;
+            }
+            newDefinition.relativeRecurrence = {
+                targetId: relativeTargetId,
+                targetType: 'single',
                 daysBefore: isDaysBeforeEnabled,
                 beforeOffset: daysBefore,
                 daysAfter: isDaysAfterEnabled,
@@ -88,6 +112,7 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
         setEndRecur('');
         setWeeklySelections(Array.from({ length: recurrenceCycle }, () => []));
         setRelativeTargetGroupId('');
+        setRelativeTargetId('');
         setIsDaysBeforeEnabled(false);
         setIsDaysAfterEnabled(false);
         setIsDayOfEnabled(false);
@@ -105,7 +130,8 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
                 <label htmlFor="recurring-date-type">Date Type</label>
                 <select id="recurring-date-type" value={dateType} onChange={(e) => setDateType(e.target.value)}>
                     <option value="specific">Specific Dates</option>
-                    <option value="relative">Relative to another event</option>
+                    <option value="relative-group">Relative to Recurring Event</option>
+                    <option value="relative-single">Relative to Single Event</option>
                 </select>
             </div>
             {dateType === 'specific' && (
@@ -144,18 +170,31 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
                     </div>
                 </>
             )}
-            {dateType === 'relative' && (
+            {(dateType === 'relative-group' || dateType === 'relative-single') && (
                  <>
                     <div className="form-group">
-                        <label htmlFor="relative-target-group">Relative To</label>
-                        <select id="relative-target-group" className="relative-target-select" value={relativeTargetGroupId} onChange={(e) => setRelativeTargetGroupId(e.target.value)}>
-                            <option value="">Select a recurring event...</option>
-                            {eventDefinitions.filter(def => def.recurrence).map((def) => (
-                                <option key={def.id} value={def.groupId}>
-                                    {def.title}
-                                </option>
-                            ))}
-                        </select>
+                        <label htmlFor={dateType === 'relative-group' ? 'relative-target-group' : 'relative-target-single'}>Relative To</label>
+                        {dateType === 'relative-group' && (
+                            <select id="relative-target-group" className="relative-target-select" value={relativeTargetGroupId} onChange={(e) => setRelativeTargetGroupId(e.target.value)}>
+                                <option value="">Select a recurring event...</option>
+                                {eventDefinitions.filter(def => def.recurrence).map((def) => (
+                                    <option key={def.id} value={def.groupId}>
+                                        {def.title}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+                        {dateType === 'relative-single' && (
+                            <select id="relative-target-single" className="relative-target-select" value={relativeTargetId} onChange={(e) => setRelativeTargetId(e.target.value)}>
+                                <option value="">Select a single event or start date...</option>
+                                <option value="start-date">Start Date</option>
+                                {eventDefinitions.filter(def => def.date).map((def) => (
+                                    <option key={def.id} value={def.id}>
+                                        {def.title} ({def.date})
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                     </div>
                     <div className="relative-option-group">
                         <input type="checkbox" id="days-before-check" checked={isDaysBeforeEnabled} onChange={() => setIsDaysBeforeEnabled(!isDaysBeforeEnabled)} />
