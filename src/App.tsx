@@ -30,7 +30,19 @@ export function App() {
   };
 
   const handleDeleteEventDefinition = (id: string) => {
-    setEventDefinitions(prev => prev.filter(def => def.id !== id));
+    setEventDefinitions(prev =>
+      prev.map(def =>
+        def.id === id ? { ...def, deleted: true } : def
+      )
+    );
+  };
+
+  const handleRestoreEventDefinition = (id: string) => {
+    setEventDefinitions(prev =>
+      prev.map(def =>
+        def.id === id ? { ...def, deleted: false } : def
+      )
+    );
   };
 
   const handleLoad = (loadedData: { calendarName: string, startDate: string, eventDefinitions: EventDefinition[] }) => {
@@ -54,6 +66,7 @@ export function App() {
         calendarName={calendarName}
         onCalendarNameChange={setCalendarName}
         onDeleteEventDefinition={handleDeleteEventDefinition}
+        onRestoreEventDefinition={handleRestoreEventDefinition}
       />
       
       <div className="main-content">

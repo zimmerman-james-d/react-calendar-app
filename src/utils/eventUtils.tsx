@@ -60,6 +60,7 @@ export function useEventGenerator(eventDefinitions: EventDefinition[], startDate
 
     // First pass: Generate all non-relative events
     for (const def of eventDefinitions) {
+      if (def.deleted) { continue; }
       if (def.date) {
         generatedEvents.push({ id: def.id, title: def.title, date: def.date });
       } else if (def.recurrence) {

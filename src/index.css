@@ -388,3 +388,36 @@
 .modal-button.cancel {
   background-color: #e0e0e0;
 }
+
+.deleted-event {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.deleted-events-section {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.deleted-events-section h3 {
+  color: #888;
+  margin-bottom: 10px;
+}
+
+.restore-event-button {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background: none;
+  border: none;
+  color: green;
+  font-size: 0.8em;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.restore-event-button:hover {
+  background-color: rgba(0, 128, 0, 0.1);
+}

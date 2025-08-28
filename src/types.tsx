@@ -2,6 +2,7 @@ export interface EventDefinition {
   id: string;
   groupId?: string;
   title: string;
+  deleted?: boolean;
 
   // --- Date Definition ---
   // For single, specific date events
