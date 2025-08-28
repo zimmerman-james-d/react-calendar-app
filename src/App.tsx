@@ -29,6 +29,10 @@ export function App() {
     setEventDefinitions(prev => [...prev, newDefinition]);
   };
 
+  const handleDeleteEventDefinition = (id: string) => {
+    setEventDefinitions(prev => prev.filter(def => def.id !== id));
+  };
+
   const handleLoad = (loadedData: { calendarName: string, startDate: string, eventDefinitions: EventDefinition[] }) => {
     setCalendarName(loadedData.calendarName);
     setStartDate(loadedData.startDate);
@@ -49,6 +53,7 @@ export function App() {
         onStartDateChange={setStartDate}
         calendarName={calendarName}
         onCalendarNameChange={setCalendarName}
+        onDeleteEventDefinition={handleDeleteEventDefinition}
       />
       
       <div className="main-content">

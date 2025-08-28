@@ -228,7 +228,26 @@
   border-radius: 4px;
   margin-bottom: 8px;
   white-space: normal;
+  position: relative;
 }
+
+.delete-event-button {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background: none;
+  border: none;
+  color: red;
+  font-size: 0.8em;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.delete-event-button:hover {
+  background-color: rgba(255, 0, 0, 0.1);
+}
+
 
 .event-list-item strong {
   color: #333;

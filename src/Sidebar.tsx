@@ -18,19 +18,21 @@ interface SidebarProps {
     onStartDateChange: (date: string) => void;
     calendarName: string;
     onCalendarNameChange: (name: string) => void;
+    onDeleteEventDefinition: (id: string) => void;
 }
 
-export function Sidebar({ 
-    isOpen, 
-    toggleSidebar, 
+export function Sidebar({
+    isOpen,
+    toggleSidebar,
     onAddEventDefinition,
     onLoad,
     eventDefinitions,
-    events, 
-    startDate, 
+    events,
+    startDate,
     onStartDateChange,
     calendarName,
-    onCalendarNameChange
+    onCalendarNameChange,
+    onDeleteEventDefinition
 }: SidebarProps) {
     return (
         <div className={`sidebar-container ${isOpen ? 'open' : 'closed'}`}>
@@ -74,7 +76,10 @@ export function Sidebar({
                     </CollapsibleSection>
 
                     <CollapsibleSection title="All Events">
-                        <EventList eventDefinitions={eventDefinitions} />
+                        <EventList 
+                            eventDefinitions={eventDefinitions} 
+                            onDeleteEventDefinition={onDeleteEventDefinition}
+                        />
                     </CollapsibleSection>
                 </div>
 

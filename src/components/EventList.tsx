@@ -3,6 +3,7 @@ import { EventDefinition } from '../types';
 
 interface EventListProps {
   eventDefinitions: EventDefinition[];
+  onDeleteEventDefinition: (id: string) => void;
 }
 
 const dayMap: { [key: number]: string } = {
@@ -84,7 +85,7 @@ function formatRecurrenceRule(definition: EventDefinition, allDefinitions: Event
   return 'Event rule not specified';
 }
 
-export function EventList({ eventDefinitions }: EventListProps) {
+export function EventList({ eventDefinitions, onDeleteEventDefinition }: EventListProps) {
   return (
     <ul className="event-list">
       {eventDefinitions.map((def) => (
@@ -94,6 +95,7 @@ export function EventList({ eventDefinitions }: EventListProps) {
           <small>
             {def.date ? def.date : formatRecurrenceRule(def, eventDefinitions)}
           </small>
+          <button className="delete-event-button" onClick={() => onDeleteEventDefinition(def.id)}>Del</button>
         </li>
       ))}
     </ul>
