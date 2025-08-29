@@ -30,7 +30,39 @@ export function App() {
   };
 
   const handleDeleteEventDefinition = (id: string) => {
-    setEventDefinitions(prev => prev.filter(def => def.id !== id));
+    setEventDefinitions(prev => {
+      const updatedDefinitions = prev.map(def =>
+        def.id === id ? { ...def, deleted: true } : def
+      );
+
+      // Now, soft-delete any events that are relative to the deleted event
+      return updatedDefinitions.map(def => {
+        if (def.relativeTo?.targetId === id ||
+            def.relativeRecurrence?.targetId === id ||
+            (def.relativeRecurrence?.targetGroupId && updatedDefinitions.find(d => d.id === id)?.groupId && def.relativeRecurrence.targetGroupId === updatedDefinitions.find(d => d.id === id)?.groupId)) {
+          return { ...def, deleted: true };
+        }
+        return def;
+      });
+    });
+  };
+
+  const handleRestoreEventDefinition = (id: string) => {
+    setEventDefinitions(prev => {
+      const updatedDefinitions = prev.map(def =>
+        def.id === id ? { ...def, deleted: false } : def
+      );
+
+      // Now, restore any events that were relative to the restored event
+      return updatedDefinitions.map(def => {
+        if (def.relativeTo?.targetId === id ||
+            def.relativeRecurrence?.targetId === id ||
+            (def.relativeRecurrence?.targetGroupId && prev.find(d => d.id === id)?.groupId && def.relativeRecurrence.targetGroupId === prev.find(d => d.id === id)?.groupId)) {
+          return { ...def, deleted: false };
+        }
+        return def;
+      });
+    });
   };
 
   const handleLoad = (loadedData: { calendarName: string, startDate: string, eventDefinitions: EventDefinition[] }) => {
@@ -54,6 +86,7 @@ export function App() {
         calendarName={calendarName}
         onCalendarNameChange={setCalendarName}
         onDeleteEventDefinition={handleDeleteEventDefinition}
+        onRestoreEventDefinition={handleRestoreEventDefinition}
       />
       
       <div className="main-content">
