@@ -5,3 +5,4 @@ dist/*
 coverage/*
 save_samples/*
 GEMINI.md
+__*

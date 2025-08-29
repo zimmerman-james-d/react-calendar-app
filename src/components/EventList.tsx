@@ -12,7 +12,7 @@ const dayMap: { [key: number]: string } = {
 };
 
 // Helper function to format the recurrence rule into a readable string
-function formatRecurrenceRule(definition: EventDefinition, allDefinitions: EventDefinition[]): React.ReactNode {
+export function formatRecurrenceRule(definition: EventDefinition, allDefinitions: EventDefinition[]): React.ReactNode {
   if (definition.recurrence) {
     const { startRecur, endRecur, weeklySelections, recurrenceCycle } = definition.recurrence;
 

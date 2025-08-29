@@ -38,6 +38,12 @@ jest.mock('crypto-js', () => ({
   },
 }));
 
+// TODO: Add tests for SaveLoadControls.tsx:
+// - handleSave: Test scenario where nothing is saved (lines 34-35).
+// - handleDecryptAndLoad: Test invalid file format after decryption (line 86).
+// - handleDecryptAndLoad: Test decryption error (lines 93-97).
+// - handleFileChange: Ensure file input is cleared after selection (line 70).
+// - Test file input accept attribute.
 describe('SaveLoadControls Component with Encryption', () => {
   const mockOnLoad = jest.fn();
   const mockEventDefinitions: EventDefinition[] = [
