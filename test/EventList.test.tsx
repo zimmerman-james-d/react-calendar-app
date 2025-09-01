@@ -9,8 +9,9 @@ const dayMap: { [key: number]: string } = {
 };
 
 describe('EventList Component', () => {
-  const mockOnDeleteEventDefinition = jest.fn();
+  const mockonRemoveEventDefinition = jest.fn();
   const mockOnRestoreEventDefinition = jest.fn();
+  const mockOnPermanentDeleteEventDefinition = jest.fn();
 
   const mockEventDefinitions: EventDefinition[] = [
     { id: '1', title: 'Test Event 1', date: '2025-10-20', deleted: false },
@@ -18,16 +19,18 @@ describe('EventList Component', () => {
   ];
 
   beforeEach(() => {
-    mockOnDeleteEventDefinition.mockClear();
+    mockonRemoveEventDefinition.mockClear();
     mockOnRestoreEventDefinition.mockClear();
+    mockOnPermanentDeleteEventDefinition.mockClear();
   });
 
-  it('should render active event definitions and call onDeleteEventDefinition when delete button is clicked', () => {
+  it('should render active event definitions and call onRemoveEventDefinition when delete button is clicked', () => {
     render(
       <EventList 
         eventDefinitions={mockEventDefinitions} 
-        onDeleteEventDefinition={mockOnDeleteEventDefinition} 
+        onRemoveEventDefinition={mockonRemoveEventDefinition} 
         onRestoreEventDefinition={mockOnRestoreEventDefinition}
+        onPermanentDeleteEventDefinition={mockOnPermanentDeleteEventDefinition}
       />
     );
 
@@ -43,22 +46,23 @@ describe('EventList Component', () => {
     expect(deletedListItems[0]).toHaveClass('deleted-event');
 
     // Find the delete button for Test Event 1 and click it
-    const deleteButtons = activeListItems[0].querySelector('.delete-event-button');
-    if (deleteButtons) {
-      fireEvent.click(deleteButtons);
+    const removeButtons = activeListItems[0].querySelector('.remove-event-button');
+    if (removeButtons) {
+      fireEvent.click(removeButtons);
     }
 
-    // Assert that onDeleteEventDefinition was called with the correct ID
-    expect(mockOnDeleteEventDefinition).toHaveBeenCalledTimes(1);
-    expect(mockOnDeleteEventDefinition).toHaveBeenCalledWith('1');
+    // Assert that onRemoveEventDefinition was called with the correct ID
+    expect(mockonRemoveEventDefinition).toHaveBeenCalledTimes(1);
+    expect(mockonRemoveEventDefinition).toHaveBeenCalledWith('1');
   });
 
   it('should render deleted event definitions and call onRestoreEventDefinition when restore button is clicked', () => {
     render(
       <EventList 
         eventDefinitions={mockEventDefinitions} 
-        onDeleteEventDefinition={mockOnDeleteEventDefinition} 
+        onRemoveEventDefinition={mockonRemoveEventDefinition} 
         onRestoreEventDefinition={mockOnRestoreEventDefinition}
+        onPermanentDeleteEventDefinition={mockOnPermanentDeleteEventDefinition}
       />
     );
 

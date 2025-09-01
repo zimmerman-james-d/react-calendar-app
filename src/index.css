@@ -231,7 +231,7 @@
   position: relative;
 }
 
-.delete-event-button {
+.remove-event-button {
   position: absolute;
   bottom: 5px;
   right: 5px;
@@ -244,7 +244,7 @@
   border-radius: 3px;
 }
 
-.delete-event-button:hover {
+.remove-event-button:hover {
   background-color: rgba(255, 0, 0, 0.1);
 }
 
@@ -407,7 +407,7 @@
 
 .restore-event-button {
   position: absolute;
-  bottom: 5px;
+  top: 5px;
   right: 5px;
   background: none;
   border: none;

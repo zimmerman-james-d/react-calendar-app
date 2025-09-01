@@ -9,6 +9,9 @@ import { App } from '../src/App';
 // - Event definition management (add, delete, restore, cascading behavior)
 // - Calendar name and start date changes
 // - Load functionality
+// - Add test case for deleting relative recurring events.
+// - Add test case for deleting single events relative to recurring event instances.
+// - Add test case for permanently deleting events and their relative events.
 
 describe('App Component', () => {
   test.todo("Write App Tests")

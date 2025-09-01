@@ -31,18 +31,41 @@ export function App() {
 
   const handleDeleteEventDefinition = (id: string) => {
     setEventDefinitions(prev => {
-      const updatedDefinitions = prev.map(def =>
-        def.id === id ? { ...def, deleted: true } : def
-      );
+      const deletedEvent = prev.find(def => def.id === id);
+      const deletedEventGroupId = deletedEvent?.groupId;
 
-      // Now, soft-delete any events that are relative to the deleted event
-      return updatedDefinitions.map(def => {
+      return prev.map(def => {
+        if (def.id === id) {
+          return { ...def, deleted: true };
+        }
         if (def.relativeTo?.targetId === id ||
+            (deletedEvent?.recurrence && def.relativeTo?.targetId?.startsWith(id + '-')) ||
             def.relativeRecurrence?.targetId === id ||
-            (def.relativeRecurrence?.targetGroupId && updatedDefinitions.find(d => d.id === id)?.groupId && def.relativeRecurrence.targetGroupId === updatedDefinitions.find(d => d.id === id)?.groupId)) {
+            (deletedEventGroupId && def.relativeRecurrence?.targetGroupId === deletedEventGroupId)) {
           return { ...def, deleted: true };
         }
         return def;
+      });
+    });
+  };
+
+  const handlePermanentDeleteEventDefinition = (id: string) => {
+    setEventDefinitions(prev => {
+      const deletedEvent = prev.find(def => def.id === id);
+      const deletedEventGroupId = deletedEvent?.groupId;
+
+      return prev.filter(def => {
+        if (def.id === id) {
+          return false; // Permanently delete this event
+        }
+        // Also permanently delete events that were relative to the deleted event
+        if (def.relativeTo?.targetId === id ||
+            (deletedEvent?.recurrence && def.relativeTo?.targetId?.startsWith(id + '-')) ||
+            def.relativeRecurrence?.targetId === id ||
+            (deletedEventGroupId && def.relativeRecurrence?.targetGroupId === deletedEventGroupId)) {
+          return false; // Permanently delete this dependent event
+        }
+        return true; // Keep other events
       });
     });
   };
@@ -85,8 +108,9 @@ export function App() {
         onStartDateChange={setStartDate}
         calendarName={calendarName}
         onCalendarNameChange={setCalendarName}
-        onDeleteEventDefinition={handleDeleteEventDefinition}
+        onRemoveEventDefinition={handleDeleteEventDefinition}
         onRestoreEventDefinition={handleRestoreEventDefinition}
+        onPermanentDeleteEventDefinition={handlePermanentDeleteEventDefinition}
       />
       
       <div className="main-content">

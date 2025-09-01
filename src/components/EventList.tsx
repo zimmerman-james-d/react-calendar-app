@@ -3,8 +3,9 @@ import { EventDefinition } from '../types';
 
 interface EventListProps {
   eventDefinitions: EventDefinition[];
-  onDeleteEventDefinition: (id: string) => void;
+  onRemoveEventDefinition: (id: string) => void;
   onRestoreEventDefinition: (id: string) => void;
+  onPermanentDeleteEventDefinition: (id: string) => void; // New prop
 }
 
 const dayMap: { [key: number]: string } = {
@@ -87,7 +88,7 @@ export function formatRecurrenceRule(definition: EventDefinition, allDefinitions
   return 'Event rule not specified';
 }
 
-export function EventList({ eventDefinitions, onDeleteEventDefinition, onRestoreEventDefinition }: EventListProps) {
+export function EventList({ eventDefinitions, onRemoveEventDefinition, onRestoreEventDefinition }: EventListProps) {
   const activeEvents = eventDefinitions.filter(def => !def.deleted);
   const deletedEvents = eventDefinitions.filter(def => def.deleted);
 
@@ -101,7 +102,7 @@ export function EventList({ eventDefinitions, onDeleteEventDefinition, onRestore
             <small>
               {def.date ? def.date : formatRecurrenceRule(def, eventDefinitions)}
             </small>
-            <button className="delete-event-button" onClick={() => onDeleteEventDefinition(def.id)}>Del</button>
+            <button className="remove-event-button" onClick={() => onRemoveEventDefinition(def.id)}>Remove</button>
           </li>
         ))}
       </ul>
@@ -111,13 +112,13 @@ export function EventList({ eventDefinitions, onDeleteEventDefinition, onRestore
           <h3>Deleted Events</h3>
           <ul className="event-list">
             {deletedEvents.map((def) => (
-              <li key={def.id} className={`event-list-item ${def.deleted ? 'deleted-event' : ''}`}>
+              <li key={def.id} className={`event-list-item ${def.deleted ? 'deleted-event' : ''}`} style={{ position: 'relative' }}>
                 <strong>{def.title}</strong>
                 <br />
                 <small>
                   {def.date ? def.date : formatRecurrenceRule(def, eventDefinitions)}
                 </small>
-                <button className="restore-event-button" onClick={() => onRestoreEventDefinition(def.id)}>Restore</button>
+                <button className="restore-event-button" onClick={() => onRestoreEventDefinition(def.id)} style={{ position: 'absolute', top: '5px', right: '5px' }}>Restore</button>
               </li>
             ))}
           </ul>
