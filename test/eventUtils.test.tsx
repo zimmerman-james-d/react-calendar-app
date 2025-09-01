@@ -3,7 +3,7 @@ import { renderHook } from '@testing-library/react';
 import { useEventGenerator } from '../src/utils/eventUtils';
 import { EventDefinition } from '../src/types';
 
-// TODO: Add tests for generateRecurringWeeklyEvents early exit condition (line 15 of eventUtils.tsx)
+// TODO: Add tests for generateRecurringWeeklyEvents early exit condition
 describe('generateRecurringWeeklyEvents', () => {
   it('should generate a simple weekly schedule correctly', () => {
     const events = generateRecurringWeeklyEvents('Weekly Meeting', '2025-08-17', '2025-08-31', [[2, 4]], 1);

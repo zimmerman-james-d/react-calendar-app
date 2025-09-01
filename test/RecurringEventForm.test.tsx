@@ -4,7 +4,7 @@ import '@testing-library/jest-dom';
 import { RecurringEventForm } from '../src/components/RecurringEventForm';
 import { EventDefinition } from '../src/types';
 
-// TODO: Add tests to cover error handling branches in RecurringEventForm.tsx (lines 47, 57-58, 69-70, 80-81, 94-95)
+// TODO: Add tests to cover error handling branches in RecurringEventForm.tsx
 describe('RecurringEventForm Component', () => {
   const mockOnAddEventDefinition = jest.fn();
   const mockEventDefinitions: EventDefinition[] = [
