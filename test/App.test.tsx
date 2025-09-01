@@ -12,6 +12,7 @@ import { App } from '../src/App';
 // - Add test case for deleting relative recurring events.
 // - Add test case for deleting single events relative to recurring event instances.
 // - Add test case for permanently deleting events and their relative events.
+// - Add test case for permanent delete confirmation modal (confirm/cancel).
 
 describe('App Component', () => {
   test.todo("Write App Tests")
