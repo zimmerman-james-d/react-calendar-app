@@ -3,6 +3,9 @@ import { EventDefinition } from '../types';
 
 interface EventListProps {
   eventDefinitions: EventDefinition[];
+  onRemoveEventDefinition: (id: string) => void;
+  onRestoreEventDefinition: (id: string) => void;
+  onPermanentDeleteEventDefinition: (id: string) => void; // New prop
 }
 
 const dayMap: { [key: number]: string } = {
@@ -10,7 +13,7 @@ const dayMap: { [key: number]: string } = {
 };
 
 // Helper function to format the recurrence rule into a readable string
-function formatRecurrenceRule(definition: EventDefinition, allDefinitions: EventDefinition[]): React.ReactNode {
+export function formatRecurrenceRule(definition: EventDefinition, allDefinitions: EventDefinition[]): React.ReactNode {
   if (definition.recurrence) {
     const { startRecur, endRecur, weeklySelections, recurrenceCycle } = definition.recurrence;
 
@@ -28,8 +31,18 @@ function formatRecurrenceRule(definition: EventDefinition, allDefinitions: Event
     );
   }
   if (definition.relativeRecurrence) {
-    const targetDef = allDefinitions.find(d => d.groupId === definition.relativeRecurrence?.targetGroupId);
-    const targetTitle = targetDef ? `"${targetDef.title}"` : "another series";
+    let targetTitle = "";
+    if (definition.relativeRecurrence.targetType === 'group') {
+        const targetDef = allDefinitions.find(d => d.groupId === definition.relativeRecurrence?.targetGroupId);
+        targetTitle = targetDef ? `"${targetDef.title}"` : "another series";
+    } else if (definition.relativeRecurrence.targetType === 'single') {
+        if (definition.relativeRecurrence.targetId === 'start-date') {
+            targetTitle = "the Start Date";
+        } else {
+            const targetDef = allDefinitions.find(d => d.id === definition.relativeRecurrence?.targetId);
+            targetTitle = targetDef ? `"${targetDef.title}"` : "another event";
+        }
+    }
     
     const parts: string[] = [];
     if (definition.relativeRecurrence.daysBefore) {
@@ -58,7 +71,8 @@ function formatRecurrenceRule(definition: EventDefinition, allDefinitions: Event
     let targetTitle = "another event";
     if (targetId === 'start-date') {
       targetTitle = "the Start Date";
-    } else {
+    }
+    else {
       const targetDef = allDefinitions.find(d => d.id === targetId);
       if (targetDef) {
         targetTitle = `"${targetDef.title}"`;
@@ -74,18 +88,43 @@ function formatRecurrenceRule(definition: EventDefinition, allDefinitions: Event
   return 'Event rule not specified';
 }
 
-export function EventList({ eventDefinitions }: EventListProps) {
+export function EventList({ eventDefinitions, onRemoveEventDefinition, onRestoreEventDefinition, onPermanentDeleteEventDefinition }: EventListProps) {
+  const activeEvents = eventDefinitions.filter(def => !def.deleted);
+  const deletedEvents = eventDefinitions.filter(def => def.deleted);
+
   return (
-    <ul className="event-list">
-      {eventDefinitions.map((def) => (
-        <li key={def.id} className="event-list-item">
-          <strong>{def.title}</strong>
-          <br />
-          <small>
-            {def.date ? def.date : formatRecurrenceRule(def, eventDefinitions)}
-          </small>
-        </li>
-      ))}
-    </ul>
+    <>
+      <ul className="event-list">
+        {activeEvents.map((def) => (
+          <li key={def.id} className="event-list-item">
+            <strong>{def.title}</strong>
+            <br />
+            <small>
+              {def.date ? def.date : formatRecurrenceRule(def, eventDefinitions)}
+            </small>
+            <button className="remove-event-button event-action-button-base" onClick={() => onRemoveEventDefinition(def.id)}>Remove</button>
+          </li>
+        ))}
+      </ul>
+
+      {deletedEvents.length > 0 && (
+        <div className="deleted-events-section">
+          <h3>Deleted Events</h3>
+          <ul className="event-list">
+            {deletedEvents.map((def) => (
+              <li key={def.id} className={`event-list-item ${def.deleted ? 'deleted-event' : ''}`} style={{ position: 'relative' }}>
+                <strong>{def.title}</strong>
+                <br />
+                <small>
+                  {def.date ? def.date : formatRecurrenceRule(def, eventDefinitions)}
+                </small>
+                <button className="restore-event-button event-action-button-base" onClick={() => onRestoreEventDefinition(def.id)}>Restore</button>
+                <button className="delete-permanently-button event-action-button-base" onClick={() => onPermanentDeleteEventDefinition(def.id)}>Delete</button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </>
   );
 }

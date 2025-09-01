@@ -228,7 +228,29 @@
   border-radius: 4px;
   margin-bottom: 8px;
   white-space: normal;
+  position: relative;
 }
+
+.event-action-button-base {
+  background: none;
+  border: none;
+  font-size: 0.8em;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.remove-event-button {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  color: red;
+}
+
+.remove-event-button:hover {
+  background-color: rgba(255, 0, 0, 0.1);
+}
+
 
 .event-list-item strong {
   color: #333;
@@ -346,6 +368,7 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   margin-bottom: 15px;
+  box-sizing: border-box;
 }
 
 .modal-actions {
@@ -368,4 +391,42 @@
 
 .modal-button.cancel {
   background-color: #e0e0e0;
+}
+
+.deleted-event {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.deleted-events-section {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.deleted-events-section h3 {
+  color: #888;
+  margin-bottom: 10px;
+}
+
+.restore-event-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  color: green;
+}
+
+.restore-event-button:hover {
+  background-color: rgba(0, 128, 0, 0.1);
+}
+
+.delete-permanently-button {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  color: red;
+}
+
+.delete-permanently-button:hover {
+  background-color: rgba(255, 0, 0, 0.1);
 }

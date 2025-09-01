@@ -5,7 +5,7 @@ import { SingleEventForm } from './components/SingleEventForm';
 import { RecurringEventForm } from './components/RecurringEventForm';
 import { EventList } from './components/EventList';
 import { SaveLoadControls } from './components/SaveLoadControls';
-import { EventDefinition } from '../types';
+import { EventDefinition } from './types';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -18,19 +18,25 @@ interface SidebarProps {
     onStartDateChange: (date: string) => void;
     calendarName: string;
     onCalendarNameChange: (name: string) => void;
+    onRemoveEventDefinition: (id: string) => void;
+    onRestoreEventDefinition: (id: string) => void;
+    onPermanentDeleteEventDefinition: (id: string) => void; // New prop
 }
 
-export function Sidebar({ 
-    isOpen, 
-    toggleSidebar, 
+export function Sidebar({
+    isOpen,
+    toggleSidebar,
     onAddEventDefinition,
     onLoad,
     eventDefinitions,
-    events, 
-    startDate, 
+    events,
+    startDate,
     onStartDateChange,
     calendarName,
-    onCalendarNameChange
+    onCalendarNameChange,
+    onRemoveEventDefinition,
+    onRestoreEventDefinition,
+    onPermanentDeleteEventDefinition // New prop
 }: SidebarProps) {
     return (
         <div className={`sidebar-container ${isOpen ? 'open' : 'closed'}`}>
@@ -74,7 +80,12 @@ export function Sidebar({
                     </CollapsibleSection>
 
                     <CollapsibleSection title="All Events">
-                        <EventList eventDefinitions={eventDefinitions} />
+                        <EventList 
+                            eventDefinitions={eventDefinitions} 
+                            onRemoveEventDefinition={onRemoveEventDefinition}
+                            onRestoreEventDefinition={onRestoreEventDefinition}
+                            onPermanentDeleteEventDefinition={onPermanentDeleteEventDefinition} // New prop
+                        />
                     </CollapsibleSection>
                 </div>
 

@@ -1,10 +1,12 @@
 # To-Do List for Calendar Features
 ## Core Functionality
-- Repeating Relative Events for a Single Event: Allow a single event to be the trigger for a recurring series (e.g., "follow-up every Monday after this specific appointment").
-
 - Dynamic Event Updates: Ensure that if an event is moved, any other events that are relative to it automatically update their positions on the calendar.
 
+- Event Edit
+
 - Session Storage: Persist the event list through page refreshes and navigating away from the page.
+
+- Calendar print view (No sidebar)
 
 ## Holiday & Warning System
 - Add Holidays: Implement a feature to add a list of holidays to the calendar.

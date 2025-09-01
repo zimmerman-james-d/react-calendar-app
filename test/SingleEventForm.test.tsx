@@ -5,6 +5,10 @@ import { SingleEventForm } from '../src/components/SingleEventForm';
 import { EventInput } from '@fullcalendar/core';
 import { EventDefinition } from '../src/types';
 
+// TODO: Add tests for SingleEventForm.tsx:
+// - handleAddEvent: Test offset cannot be 0 for relative events.
+// - handleAddEvent: Test no target event selected for relative events.
+// - handleAddEvent: Test no date selected for specific date events.
 describe('SingleEventForm Component', () => {
   const mockOnAddEventDefinition = jest.fn();
   const mockEvents: EventInput[] = [

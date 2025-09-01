@@ -4,3 +4,4 @@ dist/*
 .DS_Store
 coverage/*
 save_samples/*
+GEMINI.md

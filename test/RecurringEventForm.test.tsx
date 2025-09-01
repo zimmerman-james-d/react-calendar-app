@@ -4,6 +4,7 @@ import '@testing-library/jest-dom';
 import { RecurringEventForm } from '../src/components/RecurringEventForm';
 import { EventDefinition } from '../src/types';
 
+// TODO: Add tests to cover error handling branches in RecurringEventForm.tsx
 describe('RecurringEventForm Component', () => {
   const mockOnAddEventDefinition = jest.fn();
   const mockEventDefinitions: EventDefinition[] = [
@@ -60,7 +61,7 @@ describe('RecurringEventForm Component', () => {
   it('should create a relative recurring event with "days before" selected', () => {
     renderForm();
     
-    fireEvent.change(screen.getByLabelText('Date Type'), { target: { value: 'relative' } });
+    fireEvent.change(screen.getByLabelText('Date Type'), { target: { value: 'relative-group' } });
     fireEvent.change(screen.getByLabelText('Event Name'), { target: { value: 'Days Before Test' } });
     fireEvent.change(screen.getByLabelText('Relative To'), { target: { value: 'group-1' } });
 
@@ -76,6 +77,7 @@ describe('RecurringEventForm Component', () => {
         title: 'Days Before Test',
         relativeRecurrence: expect.objectContaining({
           targetGroupId: 'group-1',
+          targetType: 'group',
           daysBefore: true,
           beforeOffset: 3,
           daysAfter: false,
@@ -88,7 +90,7 @@ describe('RecurringEventForm Component', () => {
   it('should create a relative recurring event with "day of" selected', () => {
     renderForm();
     
-    fireEvent.change(screen.getByLabelText('Date Type'), { target: { value: 'relative' } });
+    fireEvent.change(screen.getByLabelText('Date Type'), { target: { value: 'relative-group' } });
     fireEvent.change(screen.getByLabelText('Event Name'), { target: { value: 'Day Of Test' } });
     fireEvent.change(screen.getByLabelText('Relative To'), { target: { value: 'group-1' } });
 
@@ -103,6 +105,7 @@ describe('RecurringEventForm Component', () => {
         title: 'Day Of Test',
         relativeRecurrence: expect.objectContaining({
           targetGroupId: 'group-1',
+          targetType: 'group',
           dayOf: true,
           daysBefore: false,
           daysAfter: false,
@@ -114,7 +117,7 @@ describe('RecurringEventForm Component', () => {
   it('should create a relative recurring event with "days after" selected', () => {
     renderForm();
     
-    fireEvent.change(screen.getByLabelText('Date Type'), { target: { value: 'relative' } });
+    fireEvent.change(screen.getByLabelText('Date Type'), { target: { value: 'relative-group' } });
     fireEvent.change(screen.getByLabelText('Event Name'), { target: { value: 'Days After Test' } });
     fireEvent.change(screen.getByLabelText('Relative To'), { target: { value: 'group-1' } });
 
@@ -130,8 +133,68 @@ describe('RecurringEventForm Component', () => {
         title: 'Days After Test',
         relativeRecurrence: expect.objectContaining({
           targetGroupId: 'group-1',
+          targetType: 'group',
           daysAfter: true,
           afterOffset: 5,
+          daysBefore: false,
+          dayOf: false,
+        }),
+      })
+    );
+  });
+
+  it('should create a relative recurring event relative to a single event', () => {
+    const singleEvent: EventDefinition = { id: 'single-1', title: 'Single Event', date: '2025-11-15' };
+    renderForm({ eventDefinitions: [...mockEventDefinitions, singleEvent] });
+
+    fireEvent.change(screen.getByLabelText('Date Type'), { target: { value: 'relative-single' } });
+    fireEvent.change(screen.getByLabelText('Event Name'), { target: { value: 'Relative to Single Test' } });
+    fireEvent.change(screen.getByLabelText('Relative To'), { target: { value: 'single-1' } });
+
+    const daysBeforeGroup = screen.getByLabelText('Days Before').closest('.relative-option-group');
+    if (!(daysBeforeGroup instanceof HTMLElement)) throw new Error('Could not find "Days Before" group');
+    fireEvent.click(within(daysBeforeGroup).getByRole('checkbox'));
+    fireEvent.change(within(daysBeforeGroup).getByRole('spinbutton'), { target: { value: '2' } });
+
+    fireEvent.click(screen.getByText('Add Recurring Event'));
+
+    expect(mockOnAddEventDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Relative to Single Test',
+        relativeRecurrence: expect.objectContaining({
+          targetId: 'single-1',
+          targetType: 'single',
+          daysBefore: true,
+          beforeOffset: 2,
+          daysAfter: false,
+          dayOf: false,
+        }),
+      })
+    );
+  });
+
+  it('should create a relative recurring event relative to the start date', () => {
+    renderForm();
+
+    fireEvent.change(screen.getByLabelText('Date Type'), { target: { value: 'relative-single' } });
+    fireEvent.change(screen.getByLabelText('Event Name'), { target: { value: 'Relative to Start Date Test' } });
+    fireEvent.change(screen.getByLabelText('Relative To'), { target: { value: 'start-date' } });
+
+    const daysAfterGroup = screen.getByLabelText('Days After').closest('.relative-option-group');
+    if (!(daysAfterGroup instanceof HTMLElement)) throw new Error('Could not find "Days After" group');
+    fireEvent.click(within(daysAfterGroup).getByRole('checkbox'));
+    fireEvent.change(within(daysAfterGroup).getByRole('spinbutton'), { target: { value: '10' } });
+
+    fireEvent.click(screen.getByText('Add Recurring Event'));
+
+    expect(mockOnAddEventDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Relative to Start Date Test',
+        relativeRecurrence: expect.objectContaining({
+          targetId: 'start-date',
+          targetType: 'single',
+          daysAfter: true,
+          afterOffset: 10,
           daysBefore: false,
           dayOf: false,
         }),

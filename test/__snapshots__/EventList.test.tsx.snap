@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`formatRecurrenceRule should format a recurrence rule correctly 1`] = `
+<div>
+  <div
+    style={
+      {
+        "alignItems": "center",
+        "display": "flex",
+        "justifyContent": "space-between",
+      }
+    }
+  >
+    <span>
+      2025-10-06
+       - 
+      2025-10-20
+    </span>
+    <span
+      style={
+        {
+          "textAlign": "right",
+        }
+      }
+    >
+      1
+       Week
+      
+    </span>
+  </div>
+  <div>
+    Week 
+    1
+    : 
+    Mon, Wed
+  </div>
+</div>
+`;
+
+exports[`formatRecurrenceRule should format a recurrence rule with recurrenceCycle > 1 correctly 1`] = `
+<div>
+  <div
+    style={
+      {
+        "alignItems": "center",
+        "display": "flex",
+        "justifyContent": "space-between",
+      }
+    }
+  >
+    <span>
+      2025-10-06
+       - 
+      2025-10-20
+    </span>
+    <span
+      style={
+        {
+          "textAlign": "right",
+        }
+      }
+    >
+      2
+       Week
+      s
+    </span>
+  </div>
+  <div>
+    Week 
+    1
+    : 
+    Mon
+  </div>
+  <div>
+    Week 
+    2
+    : 
+    Wed
+  </div>
+</div>
+`;
