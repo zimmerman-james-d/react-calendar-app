@@ -1,14 +1,12 @@
 # To-Do List for Calendar Features
 ## Core Functionality
-- Repeating Relative Events for a Single Event: Allow a single event to be the trigger for a single event or relative to the start date.
-  - Single Event:
-    An action occurs 4 days after an event created on August 23rd. And 2 days before that same single event.
-  - Start Date:
-    An action occurs 10 days before the start date and 36 days after the start date.
-
 - Dynamic Event Updates: Ensure that if an event is moved, any other events that are relative to it automatically update their positions on the calendar.
 
+- Event Edit
+
 - Session Storage: Persist the event list through page refreshes and navigating away from the page.
+
+- Calendar print view (No sidebar)
 
 ## Holiday & Warning System
 - Add Holidays: Implement a feature to add a list of holidays to the calendar.
