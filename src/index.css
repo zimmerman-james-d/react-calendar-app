@@ -231,17 +231,20 @@
   position: relative;
 }
 
-.remove-event-button {
-  position: absolute;
-  bottom: 5px;
-  right: 5px;
+.event-action-button-base {
   background: none;
   border: none;
-  color: red;
   font-size: 0.8em;
   cursor: pointer;
   padding: 2px 5px;
   border-radius: 3px;
+}
+
+.remove-event-button {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  color: red;
 }
 
 .remove-event-button:hover {
@@ -365,6 +368,7 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   margin-bottom: 15px;
+  box-sizing: border-box;
 }
 
 .modal-actions {
@@ -409,15 +413,20 @@
   position: absolute;
   top: 5px;
   right: 5px;
-  background: none;
-  border: none;
   color: green;
-  font-size: 0.8em;
-  cursor: pointer;
-  padding: 2px 5px;
-  border-radius: 3px;
 }
 
 .restore-event-button:hover {
   background-color: rgba(0, 128, 0, 0.1);
+}
+
+.delete-permanently-button {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  color: red;
+}
+
+.delete-permanently-button:hover {
+  background-color: rgba(255, 0, 0, 0.1);
 }

@@ -77,6 +77,7 @@ export function useEventGenerator(eventDefinitions: EventDefinition[], startDate
 
     // Second pass: Generate relative events
     for (const def of eventDefinitions) {
+        if (def.deleted) { continue; }
         if (def.relativeTo) {
             let targetDate: Date | null = null;
             if (def.relativeTo.targetId === 'start-date') {

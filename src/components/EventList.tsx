@@ -88,7 +88,7 @@ export function formatRecurrenceRule(definition: EventDefinition, allDefinitions
   return 'Event rule not specified';
 }
 
-export function EventList({ eventDefinitions, onRemoveEventDefinition, onRestoreEventDefinition }: EventListProps) {
+export function EventList({ eventDefinitions, onRemoveEventDefinition, onRestoreEventDefinition, onPermanentDeleteEventDefinition }: EventListProps) {
   const activeEvents = eventDefinitions.filter(def => !def.deleted);
   const deletedEvents = eventDefinitions.filter(def => def.deleted);
 
@@ -102,7 +102,7 @@ export function EventList({ eventDefinitions, onRemoveEventDefinition, onRestore
             <small>
               {def.date ? def.date : formatRecurrenceRule(def, eventDefinitions)}
             </small>
-            <button className="remove-event-button" onClick={() => onRemoveEventDefinition(def.id)}>Remove</button>
+            <button className="remove-event-button event-action-button-base" onClick={() => onRemoveEventDefinition(def.id)}>Remove</button>
           </li>
         ))}
       </ul>
@@ -118,7 +118,8 @@ export function EventList({ eventDefinitions, onRemoveEventDefinition, onRestore
                 <small>
                   {def.date ? def.date : formatRecurrenceRule(def, eventDefinitions)}
                 </small>
-                <button className="restore-event-button" onClick={() => onRestoreEventDefinition(def.id)} style={{ position: 'absolute', top: '5px', right: '5px' }}>Restore</button>
+                <button className="restore-event-button event-action-button-base" onClick={() => onRestoreEventDefinition(def.id)}>Restore</button>
+                <button className="delete-permanently-button event-action-button-base" onClick={() => onPermanentDeleteEventDefinition(def.id)}>Delete</button>
               </li>
             ))}
           </ul>
