@@ -5,7 +5,8 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { Sidebar } from './Sidebar';
 import { EventDefinition } from './types';
 import { useEventGenerator } from './utils/eventUtils';
-import { ConfirmationModal } from './components/ConfirmationModal'; // Import the new modal
+import { ConfirmationModal } from './components/ConfirmationModal';
+import { EditModal } from './components/EditModal';
 
 export function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -19,6 +20,12 @@ export function App() {
   const [confirmModalMessage, setConfirmModalMessage] = useState('');
   const [dependentEventsQueue, setDependentEventsQueue] = useState<EventDefinition[]>([]);
   const [currentParentEventId, setCurrentParentEventId] = useState<string | null>(null);
+
+  // State for the edit modal
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editModalEvent, setEditModalEvent] = useState<EventDefinition>()
+  const [editModalDateType, setEditModalDateType] = useState<string>('')
+
 
   const calendarEvents = useEventGenerator(eventDefinitions, startDate);
 
@@ -46,15 +53,56 @@ export function App() {
           return { ...def, deleted: true };
         }
         if (def.relativeTo?.targetId === id ||
-            (deletedEvent?.recurrence && def.relativeTo?.targetId?.startsWith(id + '-')) ||
-            def.relativeRecurrence?.targetId === id ||
-            (deletedEventGroupId && def.relativeRecurrence?.targetGroupId === deletedEventGroupId)) {
+          (deletedEvent?.recurrence && def.relativeTo?.targetId?.startsWith(id + '-')) ||
+          def.relativeRecurrence?.targetId === id ||
+          (deletedEventGroupId && def.relativeRecurrence?.targetGroupId === deletedEventGroupId)) {
           return { ...def, deleted: true };
         }
         return def;
       });
     });
   };
+
+
+  const handleEditEventDefinition = (id: string) => {
+    console.log(id)
+    setEventDefinitions(prev => {
+      return prev.map(def => {
+        console.log(def.id)
+        if (def.id === id) {
+          if (def?.date) {
+            setEditModalDateType("specific")
+          }
+          if (def?.relativeTo) {
+            setEditModalDateType("relative")
+          }
+          if (def?.recurrence) {
+
+            setEditModalDateType("specific-recurrance")
+          }
+          if (def?.relativeRecurrence) {
+            if (def?.relativeRecurrence.targetType === "single") { setEditModalDateType("relative-single") }
+
+            if (def?.relativeRecurrence.targetType === "group") { setEditModalDateType("relative-group") }
+          }
+          setIsEditModalOpen(true)
+          setEditModalEvent(def)
+          console.log(def)
+        }
+        return def;
+      })
+    })
+  }
+
+  const handleEditConfirm = () => {
+    setIsEditModalOpen(false);
+  };
+
+  const handleEditCancel = () => {
+    setIsEditModalOpen(false);
+  };
+
+
 
   const handlePermanentDeleteEventDefinition = (id: string) => {
     setEventDefinitions(prev => {
@@ -65,9 +113,9 @@ export function App() {
       const dependents = prev.filter(def => {
         if (def.id === id) return false; // Don't include the event itself
         return def.relativeTo?.targetId === id ||
-               (eventToDelete?.recurrence && def.relativeTo?.targetId?.startsWith(id + '-')) ||
-               def.relativeRecurrence?.targetId === id ||
-               (eventToDeleteGroupId && def.relativeRecurrence?.targetGroupId === eventToDeleteGroupId);
+          (eventToDelete?.recurrence && def.relativeTo?.targetId?.startsWith(id + '-')) ||
+          def.relativeRecurrence?.targetId === id ||
+          (eventToDeleteGroupId && def.relativeRecurrence?.targetGroupId === eventToDeleteGroupId);
       });
 
       if (dependents.length > 0) {
@@ -126,8 +174,8 @@ export function App() {
       // Now, restore any events that were relative to the restored event
       return updatedDefinitions.map(def => {
         if (def.relativeTo?.targetId === id ||
-            def.relativeRecurrence?.targetId === id ||
-            (def.relativeRecurrence?.targetGroupId && prev.find(d => d.id === id)?.groupId && def.relativeRecurrence.targetGroupId === prev.find(d => d.id === id)?.groupId)) {
+          def.relativeRecurrence?.targetId === id ||
+          (def.relativeRecurrence?.targetGroupId && prev.find(d => d.id === id)?.groupId && def.relativeRecurrence.targetGroupId === prev.find(d => d.id === id)?.groupId)) {
           return { ...def, deleted: false };
         }
         return def;
@@ -144,8 +192,8 @@ export function App() {
 
   return (
     <div className="app-container">
-      <Sidebar 
-        isOpen={isSidebarOpen} 
+      <Sidebar
+        isOpen={isSidebarOpen}
         toggleSidebar={() => setSidebarOpen(!isSidebarOpen)}
         onAddEventDefinition={handleAddEventDefinition}
         onLoad={handleLoad}
@@ -158,8 +206,9 @@ export function App() {
         onRemoveEventDefinition={handleDeleteEventDefinition}
         onRestoreEventDefinition={handleRestoreEventDefinition}
         onPermanentDeleteEventDefinition={handlePermanentDeleteEventDefinition}
+        onEditEventDefinition={handleEditEventDefinition}
       />
-      
+
       <div className="main-content">
         <div className="calendar-container">
           <FullCalendar
@@ -181,6 +230,20 @@ export function App() {
           message={confirmModalMessage}
           onConfirm={handleConfirmDependentDelete}
           onCancel={handleCancelDependentDelete}
+        />
+      )}
+
+      {/* Edit Modal*/}
+      {isEditModalOpen && (
+        <EditModal
+          isOpen={isEditModalOpen}
+          event={editModalEvent}
+          events={calendarEvents}
+          eventDefinitions={eventDefinitions}
+          startDate={startDate}
+          dateType={editModalDateType}
+          onConfirm={handleEditConfirm}
+          onCancel={handleEditCancel}
         />
       )}
     </div>

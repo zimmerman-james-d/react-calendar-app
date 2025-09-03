@@ -430,3 +430,14 @@
 .delete-permanently-button:hover {
   background-color: rgba(255, 0, 0, 0.1);
 }
+
+.edit-event-button{
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  color: blue;
+}
+
+.edit-event-button:hover{
+  background-color: rgba(0,0,255,0.1);
+}

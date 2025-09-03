@@ -20,7 +20,8 @@ interface SidebarProps {
     onCalendarNameChange: (name: string) => void;
     onRemoveEventDefinition: (id: string) => void;
     onRestoreEventDefinition: (id: string) => void;
-    onPermanentDeleteEventDefinition: (id: string) => void; // New prop
+    onPermanentDeleteEventDefinition: (id: string) => void;
+    onEditEventDefinition: (id: string) => void;
 }
 
 export function Sidebar({
@@ -36,7 +37,8 @@ export function Sidebar({
     onCalendarNameChange,
     onRemoveEventDefinition,
     onRestoreEventDefinition,
-    onPermanentDeleteEventDefinition // New prop
+    onPermanentDeleteEventDefinition,
+    onEditEventDefinition
 }: SidebarProps) {
     return (
         <div className={`sidebar-container ${isOpen ? 'open' : 'closed'}`}>
@@ -84,7 +86,8 @@ export function Sidebar({
                             eventDefinitions={eventDefinitions} 
                             onRemoveEventDefinition={onRemoveEventDefinition}
                             onRestoreEventDefinition={onRestoreEventDefinition}
-                            onPermanentDeleteEventDefinition={onPermanentDeleteEventDefinition} // New prop
+                            onPermanentDeleteEventDefinition={onPermanentDeleteEventDefinition}
+                            onEditEventDefinition={onEditEventDefinition}
                         />
                     </CollapsibleSection>
                 </div>
