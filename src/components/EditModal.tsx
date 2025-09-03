@@ -5,18 +5,18 @@ import { daysOfWeek } from './RecurringEventForm';
 
 interface EditModalProps {
     isOpen: boolean;
-    event: EventDefinition | undefined;
+    event: EventDefinition;
     events: EventInput[];
     eventDefinitions: EventDefinition[];
     dateType: string;
     startDate: string;
-    onConfirm: () => void;
+    onConfirm: (updatedValues: EventDefinition) => void;
     onCancel: () => void;
 }
 
 export function EditModal({ isOpen, event, events, eventDefinitions, startDate, dateType, onConfirm, onCancel }: EditModalProps) {
     if (!isOpen) return null;
-    const [title, setTitle] = useState(event?.title);
+    const [title, setTitle] = useState(event?.title || '');
     const [specificDate, setSpecificDate] = useState(event?.date);
 
     const [relativeOffset, setRelativeOffset] = useState<number>(event?.relativeTo?.offset || 1);
@@ -27,11 +27,11 @@ export function EditModal({ isOpen, event, events, eventDefinitions, startDate, 
     const [recurrenceCycle, setRecurrenceCycle] = useState(event?.recurrence?.weeklySelections.length || 2);
     const [weeklySelections, setWeeklySelections] = useState<number[][]>(event?.recurrence?.weeklySelections || [[], []]);
 
-    const [isDaysBeforeEnabled, setIsDaysBeforeEnabled] = useState(event?.relativeRecurrence?.daysBefore);
-    const [daysBefore, setDaysBefore] = useState(event?.relativeRecurrence?.beforeOffset);
-    const [isDaysAfterEnabled, setIsDaysAfterEnabled] = useState(event?.relativeRecurrence?.daysAfter);
-    const [daysAfter, setDaysAfter] = useState(event?.relativeRecurrence?.afterOffset);
-    const [isDayOfEnabled, setIsDayOfEnabled] = useState(event?.relativeRecurrence?.daysAfter);
+    const [isDaysBeforeEnabled, setIsDaysBeforeEnabled] = useState(event?.relativeRecurrence?.daysBefore || false);
+    const [daysBefore, setDaysBefore] = useState(event?.relativeRecurrence?.beforeOffset || 1);
+    const [isDaysAfterEnabled, setIsDaysAfterEnabled] = useState(event?.relativeRecurrence?.daysAfter || false);
+    const [daysAfter, setDaysAfter] = useState(event?.relativeRecurrence?.afterOffset || 1);
+    const [isDayOfEnabled, setIsDayOfEnabled] = useState(event?.relativeRecurrence?.daysAfter || false);
     const [relativeTargetGroupId, setRelativeTargetGroupId] = useState<string>(event?.relativeRecurrence?.targetGroupId || '');
     const [relativeTargetId, setRelativeTargetId] = useState<string>(event?.relativeRecurrence?.targetId || '');
 
@@ -46,6 +46,76 @@ export function EditModal({ isOpen, event, events, eventDefinitions, startDate, 
             }
             return newSelections;
         });
+    };
+
+    const handleUpdate = () => {
+        console.log(title)
+        const updatedValues = event
+        updatedValues.title = title
+        console.log(updatedValues)
+
+        if (dateType === 'specific') {
+            if (!specificDate) {
+                alert('Please select a specific date.');
+                return;
+            }
+            updatedValues.date = specificDate;
+        } else if (dateType === 'relative') {
+            if (!relativeTargetEventId) {
+                alert('Please select a target event.');
+                return;
+            }
+            let offset = relativeDirection === 'same' ? 0 : relativeOffset;
+            if (relativeDirection === 'before') {
+                offset *= -1;
+            }
+            updatedValues.relativeTo = {
+                targetId: relativeTargetEventId,
+                offset: offset,
+            };
+        }
+        if (dateType === 'specific-recurrance') {
+            if (!startRecur || !endRecur || weeklySelections.every(w => w.length === 0)) {
+                alert('Please fill out all fields for the recurrence.');
+                return;
+            }
+            updatedValues.recurrence = {
+                startRecur,
+                endRecur,
+                weeklySelections,
+                recurrenceCycle,
+            };
+        } else if (dateType === 'relative-group') {
+            if (!relativeTargetGroupId) {
+                alert('Please select a target recurring event.');
+                return;
+            }
+            updatedValues.relativeRecurrence = {
+                targetGroupId: relativeTargetGroupId,
+                targetType: 'group',
+                daysBefore: isDaysBeforeEnabled,
+                beforeOffset: daysBefore,
+                daysAfter: isDaysAfterEnabled,
+                afterOffset: daysAfter,
+                dayOf: isDayOfEnabled,
+            };
+        } else if (dateType === 'relative-single') {
+            if (!relativeTargetId) {
+                alert('Please select a target single event or start date.');
+                return;
+            }
+            updatedValues.relativeRecurrence = {
+                targetId: relativeTargetId,
+                targetType: 'single',
+                daysBefore: isDaysBeforeEnabled,
+                beforeOffset: daysBefore,
+                daysAfter: isDaysAfterEnabled,
+                afterOffset: daysAfter,
+                dayOf: isDayOfEnabled,
+            };
+        }
+
+        onConfirm(updatedValues)
     };
 
 
@@ -174,7 +244,7 @@ export function EditModal({ isOpen, event, events, eventDefinitions, startDate, 
                     </>
                 )}
                 <div className="modal-actions">
-                    <button className="modal-button submit" onClick={onConfirm}>Update</button>
+                    <button className="modal-button submit" onClick={handleUpdate}>Update</button>
                     <button className="modal-button cancel" onClick={onCancel}>Cancel</button>
                 </div>
             </div>

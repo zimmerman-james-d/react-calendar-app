@@ -23,7 +23,7 @@ export function App() {
 
   // State for the edit modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editModalEvent, setEditModalEvent] = useState<EventDefinition>()
+  const [editModalEvent, setEditModalEvent] = useState<EventDefinition>({ id: "0", title: "null" })
   const [editModalDateType, setEditModalDateType] = useState<string>('')
 
 
@@ -68,7 +68,6 @@ export function App() {
     console.log(id)
     setEventDefinitions(prev => {
       return prev.map(def => {
-        console.log(def.id)
         if (def.id === id) {
           if (def?.date) {
             setEditModalDateType("specific")
@@ -87,19 +86,25 @@ export function App() {
           }
           setIsEditModalOpen(true)
           setEditModalEvent(def)
-          console.log(def)
         }
         return def;
       })
     })
   }
 
-  const handleEditConfirm = () => {
+  const handleEditConfirm = (updatedEvent) => {
+    setEventDefinitions(prev => {
+      return prev.map(def => { if (def.id === editModalEvent.id) {
+        return (updatedEvent)
+      }})
+    })
     setIsEditModalOpen(false);
+    setEditModalEvent({ id: "0", title: "null" });
   };
 
   const handleEditCancel = () => {
     setIsEditModalOpen(false);
+    setEditModalEvent({ id: "0", title: "null" });
   };
 
 
