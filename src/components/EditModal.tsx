@@ -49,10 +49,8 @@ export function EditModal({ isOpen, event, events, eventDefinitions, startDate, 
     };
 
     const handleUpdate = () => {
-        console.log(title)
         const updatedValues = event
         updatedValues.title = title
-        console.log(updatedValues)
 
         if (dateType === 'specific') {
             if (!specificDate) {
