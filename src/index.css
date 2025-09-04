@@ -251,6 +251,17 @@
   background-color: rgba(255, 0, 0, 0.1);
 }
 
+.edit-event-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  color: blue; /* Blue color */
+}
+
+.edit-event-button:hover {
+  background-color: rgba(0, 0, 255, 0.1); /* Light blue hover */
+}
+
 
 .event-list-item strong {
   color: #333;
