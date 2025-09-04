@@ -5,7 +5,8 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { Sidebar } from './Sidebar';
 import { EventDefinition } from './types';
 import { useEventGenerator } from './utils/eventUtils';
-import { ConfirmationModal } from './components/ConfirmationModal'; // Import the new modal
+import { ConfirmationModal } from './components/ConfirmationModal';
+import { EditEventModal } from './components/EditEventModal';
 
 export function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -19,6 +20,10 @@ export function App() {
   const [confirmModalMessage, setConfirmModalMessage] = useState('');
   const [dependentEventsQueue, setDependentEventsQueue] = useState<EventDefinition[]>([]);
   const [currentParentEventId, setCurrentParentEventId] = useState<string | null>(null);
+
+  // State for edit modal
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [eventToEdit, setEventToEdit] = useState<EventDefinition | null>(null);
 
   const calendarEvents = useEventGenerator(eventDefinitions, startDate);
 
@@ -135,6 +140,19 @@ export function App() {
     });
   };
 
+  const handleEditEventDefinition = (definition: EventDefinition) => {
+    setEventToEdit(definition);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateEventDefinition = (updatedDefinition: EventDefinition) => {
+    setEventDefinitions(prev =>
+      prev.map(def => (def.id === updatedDefinition.id ? updatedDefinition : def))
+    );
+    setIsEditModalOpen(false);
+    setEventToEdit(null);
+  };
+
   const handleLoad = (loadedData: { calendarName: string, startDate: string, eventDefinitions: EventDefinition[] }) => {
     setCalendarName(loadedData.calendarName);
     setStartDate(loadedData.startDate);
@@ -158,6 +176,7 @@ export function App() {
         onRemoveEventDefinition={handleDeleteEventDefinition}
         onRestoreEventDefinition={handleRestoreEventDefinition}
         onPermanentDeleteEventDefinition={handlePermanentDeleteEventDefinition}
+        onEditEventDefinition={handleEditEventDefinition} // Pass the new handler
       />
       
       <div className="main-content">
@@ -181,6 +200,19 @@ export function App() {
           message={confirmModalMessage}
           onConfirm={handleConfirmDependentDelete}
           onCancel={handleCancelDependentDelete}
+        />
+      )}
+
+      {/* Edit Event Modal */}
+      {isEditModalOpen && (
+        <EditEventModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onUpdate={handleUpdateEventDefinition}
+          eventToEdit={eventToEdit}
+          eventDefinitions={eventDefinitions}
+          events={calendarEvents}
+          startDate={startDate}
         />
       )}
     </div>

@@ -12,6 +12,7 @@ describe('EventList Component', () => {
   const mockonRemoveEventDefinition = jest.fn();
   const mockOnRestoreEventDefinition = jest.fn();
   const mockOnPermanentDeleteEventDefinition = jest.fn();
+  const mockOnEditEventDefinition = jest.fn();
 
   const mockEventDefinitions: EventDefinition[] = [
     { id: '1', title: 'Test Event 1', date: '2025-10-20', deleted: false },
@@ -22,6 +23,7 @@ describe('EventList Component', () => {
     mockonRemoveEventDefinition.mockClear();
     mockOnRestoreEventDefinition.mockClear();
     mockOnPermanentDeleteEventDefinition.mockClear();
+    mockOnEditEventDefinition.mockClear();
   });
 
   it('should render active event definitions and call onRemoveEventDefinition when delete button is clicked', () => {
@@ -31,6 +33,7 @@ describe('EventList Component', () => {
         onRemoveEventDefinition={mockonRemoveEventDefinition} 
         onRestoreEventDefinition={mockOnRestoreEventDefinition}
         onPermanentDeleteEventDefinition={mockOnPermanentDeleteEventDefinition}
+        onEditEventDefinition={mockOnEditEventDefinition}
       />
     );
 
@@ -45,7 +48,7 @@ describe('EventList Component', () => {
     expect(deletedListItems[0]).toHaveTextContent('Test Event 2');
     expect(deletedListItems[0]).toHaveClass('deleted-event');
 
-    // Find the delete button for Test Event 1 and click it
+    // Find the remove button for Test Event 1 and click it
     const removeButtons = activeListItems[0].querySelector('.remove-event-button');
     if (removeButtons) {
       fireEvent.click(removeButtons);
@@ -63,6 +66,7 @@ describe('EventList Component', () => {
         onRemoveEventDefinition={mockonRemoveEventDefinition} 
         onRestoreEventDefinition={mockOnRestoreEventDefinition}
         onPermanentDeleteEventDefinition={mockOnPermanentDeleteEventDefinition}
+        onEditEventDefinition={mockOnEditEventDefinition}
       />
     );
 
@@ -80,6 +84,24 @@ describe('EventList Component', () => {
     // Assert that onRestoreEventDefinition was called with the correct ID
     expect(mockOnRestoreEventDefinition).toHaveBeenCalledTimes(1);
     expect(mockOnRestoreEventDefinition).toHaveBeenCalledWith('2');
+  });
+
+  it('should call onEditEventDefinition when the edit button is clicked', () => {
+    render(
+      <EventList
+        eventDefinitions={mockEventDefinitions}
+        onRemoveEventDefinition={mockonRemoveEventDefinition}
+        onRestoreEventDefinition={mockOnRestoreEventDefinition}
+        onPermanentDeleteEventDefinition={mockOnPermanentDeleteEventDefinition}
+        onEditEventDefinition={mockOnEditEventDefinition}
+      />
+    );
+
+    const editButton = screen.getByText('Edit');
+    fireEvent.click(editButton);
+
+    expect(mockOnEditEventDefinition).toHaveBeenCalledTimes(1);
+    expect(mockOnEditEventDefinition).toHaveBeenCalledWith(mockEventDefinitions[0]);
   });
 });
 
