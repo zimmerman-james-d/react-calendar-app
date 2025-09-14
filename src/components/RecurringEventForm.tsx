@@ -3,7 +3,10 @@ import { EventDefinition } from '../types';
 
 interface RecurringEventFormProps {
     onAddEventDefinition: (definition: EventDefinition) => void;
+    onUpdateEventDefinition: (definition: EventDefinition) => void; // New prop for updating
     eventDefinitions: EventDefinition[];
+    editingEvent: EventDefinition | null; // New prop for editing
+    setEditingEvent: (event: EventDefinition | null) => void; // New prop to clear editing state
 }
 
 const daysOfWeek = [
@@ -11,7 +14,13 @@ const daysOfWeek = [
     { label: 'Thu', value: 4 }, { label: 'Fri', value: 5 }, { label: 'Sat', value: 6 }
 ];
 
-export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: RecurringEventFormProps) {
+export function RecurringEventForm({
+    onAddEventDefinition,
+    onUpdateEventDefinition,
+    eventDefinitions,
+    editingEvent,
+    setEditingEvent
+}: RecurringEventFormProps) {
     const [title, setTitle] = useState('');
     const [startRecur, setStartRecur] = useState('');
     const [endRecur, setEndRecur] = useState('');
@@ -30,6 +39,47 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
     useEffect(() => {
         setWeeklySelections(currentSelections => Array.from({ length: recurrenceCycle }, (_, i) => currentSelections[i] || []));
     }, [recurrenceCycle]);
+
+    useEffect(() => {
+        if (editingEvent) {
+            setTitle(editingEvent.title);
+            if (editingEvent.recurrence) {
+                setDateType('specific');
+                setStartRecur(editingEvent.recurrence.startRecur);
+                setEndRecur(editingEvent.recurrence.endRecur);
+                setRecurrenceCycle(editingEvent.recurrence.recurrenceCycle);
+                setWeeklySelections(editingEvent.recurrence.weeklySelections);
+            } else if (editingEvent.relativeRecurrence) {
+                if (editingEvent.relativeRecurrence.targetType === 'group') {
+                    setDateType('relative-group');
+                    setRelativeTargetGroupId(editingEvent.relativeRecurrence.targetGroupId || '');
+                } else if (editingEvent.relativeRecurrence.targetType === 'single') {
+                    setDateType('relative-single');
+                    setRelativeTargetId(editingEvent.relativeRecurrence.targetId || '');
+                }
+                setIsDaysBeforeEnabled(editingEvent.relativeRecurrence.daysBefore || false);
+                setDaysBefore(editingEvent.relativeRecurrence.beforeOffset || 1);
+                setIsDaysAfterEnabled(editingEvent.relativeRecurrence.daysAfter || false);
+                setDaysAfter(editingEvent.relativeRecurrence.afterOffset || 1);
+                setIsDayOfEnabled(editingEvent.relativeRecurrence.dayOf || false);
+            }
+        } else {
+            // Clear form when no event is being edited
+            setTitle('');
+            setStartRecur('');
+            setEndRecur('');
+            setRecurrenceCycle(2);
+            setWeeklySelections([[], []]);
+            setDateType('specific');
+            setIsDaysBeforeEnabled(false);
+            setDaysBefore(1);
+            setIsDaysAfterEnabled(false);
+            setDaysAfter(1);
+            setIsDayOfEnabled(false);
+            setRelativeTargetGroupId('');
+            setRelativeTargetId('');
+        }
+    }, [editingEvent]);
 
     useEffect(() => {
         if (dateType === 'relative-group') {
@@ -58,29 +108,27 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
             return;
         }
 
-        const newDefinition: Partial<EventDefinition> = {
-            id: crypto.randomUUID(),
-            groupId: crypto.randomUUID(),
-            title,
-        };
+        const eventToSave: EventDefinition = editingEvent ? { ...editingEvent } : { id: crypto.randomUUID(), groupId: crypto.randomUUID() };
+        eventToSave.title = title;
 
         if (dateType === 'specific') {
             if (!startRecur || !endRecur || weeklySelections.every(w => w.length === 0)) {
                 alert('Please fill out all fields for the recurrence.');
                 return;
             }
-            newDefinition.recurrence = {
+            eventToSave.recurrence = {
                 startRecur,
                 endRecur,
                 weeklySelections,
                 recurrenceCycle,
             };
+            eventToSave.relativeRecurrence = undefined; // Clear relativeRecurrence if switching to specific
         } else if (dateType === 'relative-group') {
             if (!relativeTargetGroupId) {
                 alert('Please select a target recurring event.');
                 return;
             }
-            newDefinition.relativeRecurrence = {
+            eventToSave.relativeRecurrence = {
                 targetGroupId: relativeTargetGroupId,
                 targetType: 'group',
                 daysBefore: isDaysBeforeEnabled,
@@ -89,12 +137,13 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
                 afterOffset: daysAfter,
                 dayOf: isDayOfEnabled,
             };
+            eventToSave.recurrence = undefined; // Clear recurrence if switching to relative
         } else if (dateType === 'relative-single') {
             if (!relativeTargetId) {
                 alert('Please select a target single event or start date.');
                 return;
             }
-            newDefinition.relativeRecurrence = {
+            eventToSave.relativeRecurrence = {
                 targetId: relativeTargetId,
                 targetType: 'single',
                 daysBefore: isDaysBeforeEnabled,
@@ -103,21 +152,19 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
                 afterOffset: daysAfter,
                 dayOf: isDayOfEnabled,
             };
+            eventToSave.recurrence = undefined; // Clear recurrence if switching to relative
         }
 
-        onAddEventDefinition(newDefinition as EventDefinition);
-        // Reset form state
-        setTitle('');
-        setStartRecur('');
-        setEndRecur('');
-        setWeeklySelections(Array.from({ length: recurrenceCycle }, () => []));
-        setRelativeTargetGroupId('');
-        setRelativeTargetId('');
-        setIsDaysBeforeEnabled(false);
-        setIsDaysAfterEnabled(false);
-        setIsDayOfEnabled(false);
-        setDaysBefore(1);
-        setDaysAfter(1);
+        if (editingEvent) {
+            onUpdateEventDefinition(eventToSave);
+        } else {
+            onAddEventDefinition(eventToSave);
+        }
+        setEditingEvent(null); // Clear editing state after save
+    };
+
+    const handleCancelEdit = () => {
+        setEditingEvent(null);
     };
 
     return (
@@ -212,7 +259,10 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
                     </div>
                 </>
             )}
-            <button onClick={handleSave} className="save-event-button">Add Recurring Event</button>
+            <button onClick={handleSave} className="save-event-button">{editingEvent ? 'Update Recurring Event' : 'Add Recurring Event'}</button>
+            {editingEvent && (
+                <button onClick={handleCancelEdit} className="cancel-edit-button">Cancel Edit</button>
+            )}
         </>
     );
 }

@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EventDefinition } from '../types';
 import { EventInput } from '@fullcalendar/core';
 
 interface SingleEventFormProps {
     onAddEventDefinition: (definition: EventDefinition) => void;
+    onUpdateEventDefinition: (definition: EventDefinition) => void; // New prop for updating
     events: EventInput[];
     startDate: string;
+    editingEvent: EventDefinition | null; // New prop for editing
+    setEditingEvent: (event: EventDefinition | null) => void; // New prop to clear editing state
 }
 
-export function SingleEventForm({ onAddEventDefinition, events, startDate }: SingleEventFormProps) {
+export function SingleEventForm({
+    onAddEventDefinition,
+    onUpdateEventDefinition,
+    events,
+    startDate,
+    editingEvent,
+    setEditingEvent
+}: SingleEventFormProps) {
     const [title, setTitle] = useState('');
     const [specificDate, setSpecificDate] = useState('');
     const [dateType, setDateType] = useState('specific');
@@ -17,23 +27,53 @@ export function SingleEventForm({ onAddEventDefinition, events, startDate }: Sin
     const [relativeDirection, setRelativeDirection] = useState<'after' | 'before' | 'same'>('after');
     const [relativeTargetEventId, setRelativeTargetEventId] = useState<string>('');
 
+    useEffect(() => {
+        if (editingEvent) {
+            setTitle(editingEvent.title);
+            if (editingEvent.date) {
+                setDateType('specific');
+                setSpecificDate(editingEvent.date);
+            } else if (editingEvent.relativeTo) {
+                setDateType('relative');
+                setRelativeTargetEventId(editingEvent.relativeTo.targetId);
+                if (editingEvent.relativeTo.offset === 0) {
+                    setRelativeDirection('same');
+                    setRelativeOffset(1); // Offset doesn't matter for 'same'
+                } else if (editingEvent.relativeTo.offset > 0) {
+                    setRelativeDirection('after');
+                    setRelativeOffset(editingEvent.relativeTo.offset);
+                } else {
+                    setRelativeDirection('before');
+                    setRelativeOffset(Math.abs(editingEvent.relativeTo.offset));
+                }
+            }
+        } else {
+            // Clear form when no event is being edited
+            setTitle('');
+            setSpecificDate('');
+            setDateType('specific');
+            setRelativeOffset(1);
+            setRelativeDirection('after');
+            setRelativeTargetEventId('');
+        }
+    }, [editingEvent]);
+
     const handleSave = () => {
         if (!title) {
             alert('Please enter an event title.');
             return;
         }
 
-        const newDefinition: Partial<EventDefinition> = {
-            id: crypto.randomUUID(),
-            title,
-        };
+        const eventToSave: EventDefinition = editingEvent ? { ...editingEvent } : { id: crypto.randomUUID() };
+        eventToSave.title = title;
 
         if (dateType === 'specific') {
             if (!specificDate) {
                 alert('Please select a specific date.');
                 return;
             }
-            newDefinition.date = specificDate;
+            eventToSave.date = specificDate;
+            eventToSave.relativeTo = undefined; // Clear relativeTo if switching to specific
         } else if (dateType === 'relative') {
             if (!relativeTargetEventId) {
                 alert('Please select a target event.');
@@ -43,17 +83,23 @@ export function SingleEventForm({ onAddEventDefinition, events, startDate }: Sin
             if (relativeDirection === 'before') {
                 offset *= -1;
             }
-            newDefinition.relativeTo = {
+            eventToSave.relativeTo = {
                 targetId: relativeTargetEventId,
                 offset: offset,
             };
+            eventToSave.date = undefined; // Clear date if switching to relative
         }
 
-        onAddEventDefinition(newDefinition as EventDefinition);
-        setTitle('');
-        setSpecificDate('');
-        setRelativeOffset(1);
-        setRelativeTargetEventId('');
+        if (editingEvent) {
+            onUpdateEventDefinition(eventToSave);
+        } else {
+            onAddEventDefinition(eventToSave);
+        }
+        setEditingEvent(null); // Clear editing state after save
+    };
+
+    const handleCancelEdit = () => {
+        setEditingEvent(null);
     };
 
     return (
@@ -107,7 +153,10 @@ export function SingleEventForm({ onAddEventDefinition, events, startDate }: Sin
                     </select>
                 </div>
             )}
-            <button onClick={handleSave} className="save-event-button">Add Event</button>
+            <button onClick={handleSave} className="save-event-button">{editingEvent ? 'Update Event' : 'Add Event'}</button>
+            {editingEvent && (
+                <button onClick={handleCancelEdit} className="cancel-edit-button">Cancel Edit</button>
+            )}
         </>
     );
 }

@@ -6,6 +6,7 @@ interface EventListProps {
   onRemoveEventDefinition: (id: string) => void;
   onRestoreEventDefinition: (id: string) => void;
   onPermanentDeleteEventDefinition: (id: string) => void; // New prop
+  onEditEventDefinition: (event: EventDefinition) => void;
 }
 
 const dayMap: { [key: number]: string } = {
@@ -88,7 +89,7 @@ export function formatRecurrenceRule(definition: EventDefinition, allDefinitions
   return 'Event rule not specified';
 }
 
-export function EventList({ eventDefinitions, onRemoveEventDefinition, onRestoreEventDefinition, onPermanentDeleteEventDefinition }: EventListProps) {
+export function EventList({ eventDefinitions, onRemoveEventDefinition, onRestoreEventDefinition, onPermanentDeleteEventDefinition, onEditEventDefinition }: EventListProps) {
   const activeEvents = eventDefinitions.filter(def => !def.deleted);
   const deletedEvents = eventDefinitions.filter(def => def.deleted);
 
@@ -96,7 +97,8 @@ export function EventList({ eventDefinitions, onRemoveEventDefinition, onRestore
     <>
       <ul className="event-list">
         {activeEvents.map((def) => (
-          <li key={def.id} className="event-list-item">
+          <li key={def.id} className="event-list-item" style={{ position: 'relative' }}>
+            <button className="edit-event-button event-action-button-base" onClick={() => onEditEventDefinition(def)}>Edit</button>
             <strong>{def.title}</strong>
             <br />
             <small>
@@ -113,6 +115,7 @@ export function EventList({ eventDefinitions, onRemoveEventDefinition, onRestore
           <ul className="event-list">
             {deletedEvents.map((def) => (
               <li key={def.id} className={`event-list-item ${def.deleted ? 'deleted-event' : ''}`} style={{ position: 'relative' }}>
+                <button className="edit-event-button event-action-button-base" onClick={() => onEditEventDefinition(def)}>Edit</button>
                 <strong>{def.title}</strong>
                 <br />
                 <small>

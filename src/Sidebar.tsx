@@ -11,6 +11,7 @@ interface SidebarProps {
     isOpen: boolean;
     toggleSidebar: () => void;
     onAddEventDefinition: (definition: EventDefinition) => void;
+    onUpdateEventDefinition: (definition: EventDefinition) => void; // New prop
     onLoad: (data: { calendarName: string, startDate: string, eventDefinitions: EventDefinition[] }) => void;
     eventDefinitions: EventDefinition[];
     events: EventInput[];
@@ -20,13 +21,17 @@ interface SidebarProps {
     onCalendarNameChange: (name: string) => void;
     onRemoveEventDefinition: (id: string) => void;
     onRestoreEventDefinition: (id: string) => void;
-    onPermanentDeleteEventDefinition: (id: string) => void; // New prop
+    onPermanentDeleteEventDefinition: (id: string) => void;
+    onEditEventDefinition: (event: EventDefinition) => void;
+    editingEvent: EventDefinition | null;
+    setEditingEvent: (event: EventDefinition | null) => void;
 }
 
 export function Sidebar({
     isOpen,
     toggleSidebar,
     onAddEventDefinition,
+    onUpdateEventDefinition, // New prop
     onLoad,
     eventDefinitions,
     events,
@@ -36,7 +41,10 @@ export function Sidebar({
     onCalendarNameChange,
     onRemoveEventDefinition,
     onRestoreEventDefinition,
-    onPermanentDeleteEventDefinition // New prop
+    onPermanentDeleteEventDefinition,
+    onEditEventDefinition,
+    editingEvent,
+    setEditingEvent
 }: SidebarProps) {
     return (
         <div className={`sidebar-container ${isOpen ? 'open' : 'closed'}`}>
@@ -67,15 +75,21 @@ export function Sidebar({
                     <CollapsibleSection title="Single Event" initialOpen={true}>
                         <SingleEventForm 
                             onAddEventDefinition={onAddEventDefinition}
+                            onUpdateEventDefinition={onUpdateEventDefinition} // New prop
                             events={events}
                             startDate={startDate}
+                            editingEvent={editingEvent}
+                            setEditingEvent={setEditingEvent}
                         />
                     </CollapsibleSection>
 
                     <CollapsibleSection title="Recurring Event">
                         <RecurringEventForm 
                             onAddEventDefinition={onAddEventDefinition}
+                            onUpdateEventDefinition={onUpdateEventDefinition} // New prop
                             eventDefinitions={eventDefinitions}
+                            editingEvent={editingEvent}
+                            setEditingEvent={setEditingEvent}
                         />
                     </CollapsibleSection>
 
@@ -85,6 +99,7 @@ export function Sidebar({
                             onRemoveEventDefinition={onRemoveEventDefinition}
                             onRestoreEventDefinition={onRestoreEventDefinition}
                             onPermanentDeleteEventDefinition={onPermanentDeleteEventDefinition} // New prop
+                            onEditEventDefinition={onEditEventDefinition}
                         />
                     </CollapsibleSection>
                 </div>

@@ -266,3 +266,5 @@ describe('formatRecurrenceRule', () => {
     expect(result).toBe('Event rule not specified');
   });
 });
+
+// TODO: Add tests for the new edit button functionality.
