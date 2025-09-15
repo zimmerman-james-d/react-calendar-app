@@ -176,7 +176,7 @@ export function App() {
         onRemoveEventDefinition={handleDeleteEventDefinition}
         onRestoreEventDefinition={handleRestoreEventDefinition}
         onPermanentDeleteEventDefinition={handlePermanentDeleteEventDefinition}
-        onEditEventDefinition={handleEditEventDefinition} // Pass the new handler
+        onEditEventDefinition={handleEditEventDefinition}
       />
       
       <div className="main-content">

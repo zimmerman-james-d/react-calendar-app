@@ -56,6 +56,7 @@
 
 .sidebar-container.closed .sidebar {
   width: 0;
+  padding: 0px;
 }
 
 .sidebar-toggle-button {
@@ -440,4 +441,36 @@
 
 .delete-permanently-button:hover {
   background-color: rgba(255, 0, 0, 0.1);
+}
+
+@media print {
+  /* Hide elements not needed for print */
+  .sidebar, .sidebar-toggle-button {
+    display: none !important;
+  }
+
+  /* Adjust main content area */
+  .main-content {
+    width: 100% !important;
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+
+  .fc-event-title {
+    white-space: normal !important;
+  }
+
+  .fc .fc-button {
+    display: none !important;
+  }
+
+  .fc-col-header {
+    width: 98vw !important;
+  }
+
+  .fc-scrollgrid-sync-table{
+    width: 98vw !important;
+    height: 87vh !important;
+    table-layout: fixed !important;
+  }
 }
