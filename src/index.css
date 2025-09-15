@@ -465,10 +465,12 @@
   }
 
   .fc-col-header {
-    width: 100% !important;
+    width: 98vw !important;
   }
 
-  .fc .fc-daygrid-body, .fc-daygrid-body-unbalanced {
-    width: 100% !important;
+  .fc-scrollgrid-sync-table{
+    width: 98vw !important;
+    height: 87vh !important;
+    table-layout: fixed !important;
   }
 }
