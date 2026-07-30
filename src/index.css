@@ -443,34 +443,75 @@
   background-color: rgba(255, 0, 0, 0.1);
 }
 
+.print-title {
+  display: none;
+}
+
 @media print {
-  /* Hide elements not needed for print */
-  .sidebar, .sidebar-toggle-button {
-    display: none !important;
+  @page {
+    margin: 0.4in;
   }
 
-  /* Adjust main content area */
+  /* The app shell is a fixed-height flex layout built for the viewport. On
+     paper it has to collapse to plain blocks so the calendar can flow onto
+     the page instead of being clipped to one screenful. */
+  .app-container {
+    display: block;
+    height: auto;
+    width: auto;
+    overflow: visible;
+  }
+
   .main-content {
-    width: 100% !important;
-    margin-left: 0 !important;
-    padding: 0 !important;
+    display: block;
+    padding: 0;
   }
 
-  .fc-event-title {
-    white-space: normal !important;
+  .calendar-container {
+    height: auto;
   }
 
+  /* Sidebar, its toggle, and the month navigation are screen-only. */
+  .sidebar-container,
   .fc .fc-button {
     display: none !important;
   }
 
-  .fc-col-header {
-    width: 98vw !important;
+  /* The calendar name is only ever visible on the printout, where the sheet
+     needs to say whose schedule it is. */
+  .print-title {
+    display: block;
+    margin: 0 0 6pt;
+    font-size: 14pt;
+    text-align: center;
   }
 
-  .fc-scrollgrid-sync-table{
-    width: 98vw !important;
-    height: 87vh !important;
-    table-layout: fixed !important;
+  .fc .fc-toolbar.fc-header-toolbar {
+    margin-bottom: 8pt;
+  }
+
+  /* Browsers drop background colours and wash out light borders when
+     printing unless asked not to; #ddd grid lines all but disappear. */
+  .fc {
+    --fc-border-color: #999;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Give every week the same floor so a month fills the sheet, and keep a
+     week from being split down the middle by a page break. In print, vh is a
+     share of the page area, so this adapts to paper size and orientation. */
+  .fc .fc-daygrid-day-frame {
+    min-height: 14vh;
+  }
+
+  .fc .fc-daygrid-body tr {
+    break-inside: avoid;
+  }
+
+  /* On paper there is no hovering to reveal a truncated title, so wrap. */
+  .fc-daygrid-event,
+  .fc-event-title {
+    white-space: normal !important;
   }
 }
