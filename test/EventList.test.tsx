@@ -141,6 +141,20 @@ describe('formatRecurrenceRule', () => {
     expect(result).toMatchSnapshot();
   });
 
+  it('should format a recurrence rule relative to the start date as a day-offset window', () => {
+    const definition: EventDefinition = {
+      id: 'rec-3',
+      title: 'Chemo Cycle',
+      recurrence: {
+        weeklySelections: [[1, 3]],
+        recurrenceCycle: 1,
+        relativeToStartDate: { startOffset: 0, endOffset: 84 },
+      },
+    };
+    const result = formatRecurrenceRule(definition, []);
+    expect(result).toMatchSnapshot();
+  });
+
   it('should format a relative recurrence to a group with daysBefore', () => {
     const definition: EventDefinition = {
       id: 'rel-rec-1',

@@ -10,10 +10,16 @@ export interface EventDefinition {
 
   // For recurring events with specific weekly patterns
   recurrence?: {
-    startRecur: string;
-    endRecur: string;
+    startRecur?: string;
+    endRecur?: string;
     weeklySelections: number[][];
     recurrenceCycle: number;
+    // When set, startRecur/endRecur are ignored and the window is computed as
+    // start-date + offset (in days) each time the calendar regenerates.
+    relativeToStartDate?: {
+      startOffset: number;
+      endOffset: number;
+    };
   };
 
   // For events relative to another single event

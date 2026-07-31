@@ -4,8 +4,8 @@ import { EventDefinition } from '../types';
 
 export function generateRecurringWeeklyEvents(
     recurringTitle: string,
-    startRecur: string,
-    endRecur: string,
+    startRecur: string | undefined,
+    endRecur: string | undefined,
     weeklySelections: number[][],
     recurrenceCycle: number
 ): EventInput[] {
@@ -64,10 +64,21 @@ export function useEventGenerator(eventDefinitions: EventDefinition[], startDate
       if (def.date) {
         generatedEvents.push({ id: def.id, title: def.title, date: def.date });
       } else if (def.recurrence) {
+        let startRecur = def.recurrence.startRecur;
+        let endRecur = def.recurrence.endRecur;
+
+        if (def.recurrence.relativeToStartDate) {
+            if (!startDate) { continue; }
+            const [y, m, d] = startDate.split('-').map(Number);
+            const baseDate = new Date(Date.UTC(y, m - 1, d));
+            startRecur = generateRecurringRelativeDate(baseDate, def.recurrence.relativeToStartDate.startOffset).toISOString().split('T')[0];
+            endRecur = generateRecurringRelativeDate(baseDate, def.recurrence.relativeToStartDate.endOffset).toISOString().split('T')[0];
+        }
+
         const weeklyEvents = generateRecurringWeeklyEvents(
             def.title,
-            def.recurrence.startRecur,
-            def.recurrence.endRecur,
+            startRecur,
+            endRecur,
             def.recurrence.weeklySelections,
             def.recurrence.recurrenceCycle
         ).map(e => ({ ...e, id: `${def.id}-${e.date}`, groupId: def.groupId }));

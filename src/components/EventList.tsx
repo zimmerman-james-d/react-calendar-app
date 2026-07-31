@@ -16,12 +16,16 @@ const dayMap: { [key: number]: string } = {
 // Helper function to format the recurrence rule into a readable string
 export function formatRecurrenceRule(definition: EventDefinition, allDefinitions: EventDefinition[]): React.ReactNode {
   if (definition.recurrence) {
-    const { startRecur, endRecur, weeklySelections, recurrenceCycle } = definition.recurrence;
+    const { startRecur, endRecur, weeklySelections, recurrenceCycle, relativeToStartDate } = definition.recurrence;
 
     return (
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span>{startRecur} - {endRecur}</span>
+          <span>
+            {relativeToStartDate
+              ? <>Day {relativeToStartDate.startOffset} to Day {relativeToStartDate.endOffset} (from Start Date)</>
+              : <>{startRecur} - {endRecur}</>}
+          </span>
           <span style={{ textAlign: 'right' }}>{recurrenceCycle} Week{recurrenceCycle > 1 ? 's' : ''}</span>
         </div>
         {weeklySelections.map((days, index) => {

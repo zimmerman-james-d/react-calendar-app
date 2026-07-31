@@ -12,9 +12,52 @@ exports[`formatRecurrenceRule should format a recurrence rule correctly 1`] = `
     }
   >
     <span>
-      2025-10-06
-       - 
-      2025-10-20
+      <React.Fragment>
+        2025-10-06
+         - 
+        2025-10-20
+      </React.Fragment>
+    </span>
+    <span
+      style={
+        {
+          "textAlign": "right",
+        }
+      }
+    >
+      1
+       Week
+      
+    </span>
+  </div>
+  <div>
+    Week 
+    1
+    : 
+    Mon, Wed
+  </div>
+</div>
+`;
+
+exports[`formatRecurrenceRule should format a recurrence rule relative to the start date as a day-offset window 1`] = `
+<div>
+  <div
+    style={
+      {
+        "alignItems": "center",
+        "display": "flex",
+        "justifyContent": "space-between",
+      }
+    }
+  >
+    <span>
+      <React.Fragment>
+        Day 
+        0
+         to Day 
+        84
+         (from Start Date)
+      </React.Fragment>
     </span>
     <span
       style={
@@ -49,9 +92,11 @@ exports[`formatRecurrenceRule should format a recurrence rule with recurrenceCyc
     }
   >
     <span>
-      2025-10-06
-       - 
-      2025-10-20
+      <React.Fragment>
+        2025-10-06
+         - 
+        2025-10-20
+      </React.Fragment>
     </span>
     <span
       style={
