@@ -37,6 +37,22 @@ export function App() {
     return () => clearTimeout(timer);
   }, [isSidebarOpen]);
 
+  // FullCalendar only lays itself out for paper when it is told a print is
+  // starting. Without this it prints its on-screen scrolling layout, so the
+  // header row and the day grid end up measured against different widths.
+  useEffect(() => {
+    const handleBeforePrint = () => calendarRef.current?.getApi().trigger('_beforeprint');
+    const handleAfterPrint = () => calendarRef.current?.getApi().trigger('_afterprint');
+
+    window.addEventListener('beforeprint', handleBeforePrint);
+    window.addEventListener('afterprint', handleAfterPrint);
+
+    return () => {
+      window.removeEventListener('beforeprint', handleBeforePrint);
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
+  }, []);
+
   const handleAddEventDefinition = (newDefinition: EventDefinition) => {
     setEventDefinitions(prev => [...prev, newDefinition]);
   };
@@ -180,6 +196,7 @@ export function App() {
       />
       
       <div className="main-content">
+        {calendarName && <h1 className="print-title">{calendarName}</h1>}
         <div className="calendar-container">
           <FullCalendar
             ref={calendarRef}

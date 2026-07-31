@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup';
 import postcss from 'esbuild-plugin-postcss2';
 
-export default defineConfig({
+export default defineConfig((options) => ({
   entry: {
     index: 'src/index.tsx',
   },
@@ -18,12 +18,16 @@ export default defineConfig({
       js: `.js`,
     };
   },
-  // Add this section to define the environment variable
-  esbuildOptions(options) {
-    options.define = {
-      ...options.define,
-      'process.env.NODE_ENV': JSON.stringify('production'),
+  // `pnpm dev` (tsup --watch) builds for development, `pnpm build` for
+  // production. Development-only code is compiled out of the shipped bundle
+  // rather than merely hidden, so it cannot be reached from the public site.
+  esbuildOptions(esbuildOptions) {
+    esbuildOptions.define = {
+      ...esbuildOptions.define,
+      'process.env.NODE_ENV': JSON.stringify(
+        options.watch ? 'development' : 'production'
+      ),
     };
-    return options;
+    return esbuildOptions;
   },
-});
+}));

@@ -6,7 +6,11 @@
 
 - Session Storage: Persist the event list through page refreshes and navigating away from the page.
 
-- Calendar print view (No sidebar)
+- ~~Calendar print view (No sidebar)~~ Done: sidebar/nav hidden, calendar name printed as a heading, month fills the sheet.
+
+- Multi-page print
+
+- Save to encrypted string/qrcode?
 
 ## Holiday & Warning System
 - Add Holidays: Implement a feature to add a list of holidays to the calendar.
@@ -22,3 +26,7 @@
 
 ## UI/UX
 - Fix Choppy Calendar Resize: Smooth out the animation when the sidebar expands and collapses.
+
+- ~~Fix bad print lines~~ Done: the doubled column rules came from the header
+  table and day grid being forced to different widths by the `98vw` print
+  overrides; FullCalendar is now switched into its own print mode instead.

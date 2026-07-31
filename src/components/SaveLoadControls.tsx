@@ -24,7 +24,18 @@ const createFileName = (name: string): string => {
 };
 
 
-const DEBUG_PASSWORD = "debug123"; // Secret debug password
+// This is not a secret. The repo is public and the bundle ships to anyone who
+// loads the page, so the password alone gates nothing — it only keeps the debug
+// path out of the way while developing. The flag below is what disables it on
+// the deployed site: tsup fixes NODE_ENV at build time, so this resolves to a
+// constant false there and the debug save can never be triggered. The code is
+// still present in the bundle, just unreachable.
+// Declared narrowly rather than pulling in @types/node just for this: tsup
+// substitutes the value at build time, and Jest supplies the real global.
+declare const process: { env: { NODE_ENV?: string } };
+
+const DEBUG_PASSWORD = "debug123";
+const DEBUG_TOOLS_ENABLED = process.env.NODE_ENV !== 'production';
 
 export function SaveLoadControls({ eventDefinitions, startDate, calendarName, onLoad }: SaveLoadControlsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -60,7 +71,7 @@ export function SaveLoadControls({ eventDefinitions, startDate, calendarName, on
   };
 
   const handleSave = (password: string) => {
-    if (password === DEBUG_PASSWORD) {
+    if (DEBUG_TOOLS_ENABLED && password === DEBUG_PASSWORD) {
       handleDebugSave({
         calendarName,
         startDate,
