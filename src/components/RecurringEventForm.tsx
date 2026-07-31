@@ -27,6 +27,9 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
     const [relativeTargetGroupId, setRelativeTargetGroupId] = useState<string>('');
     const [relativeTargetId, setRelativeTargetId] = useState<string>('');
 
+    const [startOffset, setStartOffset] = useState(0);
+    const [endOffset, setEndOffset] = useState(7);
+
     useEffect(() => {
         setWeeklySelections(currentSelections => Array.from({ length: recurrenceCycle }, (_, i) => currentSelections[i] || []));
     }, [recurrenceCycle]);
@@ -75,6 +78,20 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
                 weeklySelections,
                 recurrenceCycle,
             };
+        } else if (dateType === 'relative-start-window') {
+            if (weeklySelections.every(w => w.length === 0)) {
+                alert('Please fill out all fields for the recurrence.');
+                return;
+            }
+            if (startOffset > endOffset) {
+                alert('Start Offset must not be after End Offset.');
+                return;
+            }
+            newDefinition.recurrence = {
+                weeklySelections,
+                recurrenceCycle,
+                relativeToStartDate: { startOffset, endOffset },
+            };
         } else if (dateType === 'relative-group') {
             if (!relativeTargetGroupId) {
                 alert('Please select a target recurring event.');
@@ -118,6 +135,8 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
         setIsDayOfEnabled(false);
         setDaysBefore(1);
         setDaysAfter(1);
+        setStartOffset(0);
+        setEndOffset(7);
     };
 
     return (
@@ -130,11 +149,12 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
                 <label htmlFor="recurring-date-type">Date Type</label>
                 <select id="recurring-date-type" value={dateType} onChange={(e) => setDateType(e.target.value)}>
                     <option value="specific">Specific Dates</option>
+                    <option value="relative-start-window">Relative to Start Date (Window)</option>
                     <option value="relative-group">Relative to Recurring Event</option>
                     <option value="relative-single">Relative to Single Event</option>
                 </select>
             </div>
-            {dateType === 'specific' && (
+            {(dateType === 'specific' || dateType === 'relative-start-window') && (
                 <>
                     <div className="form-group">
                         <label htmlFor="recurrence-cycle">Repeats Every</label>
@@ -150,9 +170,9 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
                             <label>Week {index + 1} Repeats On</label>
                             <div className="day-picker">
                                 {daysOfWeek.map(day => (
-                                    <button 
-                                        key={day.value} 
-                                        className={`day-button ${weeklySelections[index]?.includes(day.value) ? 'selected' : ''}`} 
+                                    <button
+                                        key={day.value}
+                                        className={`day-button ${weeklySelections[index]?.includes(day.value) ? 'selected' : ''}`}
                                         onClick={() => handleDayToggle(day.value, index)}>
                                         {day.label}
                                     </button>
@@ -160,14 +180,30 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
                             </div>
                         </div>
                     ))}
-                    <div className="form-group">
-                        <label htmlFor="start-recur">Start Date</label>
-                        <input type="date" id="start-recur" value={startRecur} onChange={(e) => setStartRecur(e.target.value)} />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="end-recur">End Date</label>
-                        <input type="date" id="end-recur" value={endRecur} onChange={(e) => setEndRecur(e.target.value)} />
-                    </div>
+                    {dateType === 'specific' && (
+                        <>
+                            <div className="form-group">
+                                <label htmlFor="start-recur">Start Date</label>
+                                <input type="date" id="start-recur" value={startRecur} onChange={(e) => setStartRecur(e.target.value)} />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="end-recur">End Date</label>
+                                <input type="date" id="end-recur" value={endRecur} onChange={(e) => setEndRecur(e.target.value)} />
+                            </div>
+                        </>
+                    )}
+                    {dateType === 'relative-start-window' && (
+                        <>
+                            <div className="form-group">
+                                <label htmlFor="start-offset">Start Offset (days from Start Date)</label>
+                                <input type="number" id="start-offset" value={startOffset} onChange={(e) => setStartOffset(Number(e.target.value))} />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="end-offset">End Offset (days from Start Date)</label>
+                                <input type="number" id="end-offset" value={endOffset} onChange={(e) => setEndOffset(Number(e.target.value))} />
+                            </div>
+                        </>
+                    )}
                 </>
             )}
             {(dateType === 'relative-group' || dateType === 'relative-single') && (

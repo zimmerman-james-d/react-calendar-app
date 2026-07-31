@@ -173,6 +173,50 @@ describe('RecurringEventForm Component', () => {
     );
   });
 
+  it('should create a recurring event with a window relative to the start date', () => {
+    renderForm();
+
+    fireEvent.change(screen.getByLabelText('Date Type'), { target: { value: 'relative-start-window' } });
+    fireEvent.change(screen.getByLabelText('Event Name'), { target: { value: 'Chemo Cycle' } });
+    fireEvent.change(screen.getByLabelText('Repeats Every'), { target: { value: '1' } });
+
+    fireEvent.click(screen.getByText('Mon'));
+    fireEvent.click(screen.getByText('Wed'));
+
+    fireEvent.change(screen.getByLabelText('Start Offset (days from Start Date)'), { target: { value: '0' } });
+    fireEvent.change(screen.getByLabelText('End Offset (days from Start Date)'), { target: { value: '84' } });
+
+    fireEvent.click(screen.getByText('Add Recurring Event'));
+
+    expect(mockOnAddEventDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Chemo Cycle',
+        recurrence: expect.objectContaining({
+          weeklySelections: [[1, 3]],
+          relativeToStartDate: { startOffset: 0, endOffset: 84 },
+        }),
+      })
+    );
+  });
+
+  it('should reject a relative window whose start offset is after its end offset', () => {
+    const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+    renderForm();
+
+    fireEvent.change(screen.getByLabelText('Date Type'), { target: { value: 'relative-start-window' } });
+    fireEvent.change(screen.getByLabelText('Event Name'), { target: { value: 'Invalid Window' } });
+    fireEvent.change(screen.getByLabelText('Repeats Every'), { target: { value: '1' } });
+    fireEvent.click(screen.getByText('Mon'));
+    fireEvent.change(screen.getByLabelText('Start Offset (days from Start Date)'), { target: { value: '10' } });
+    fireEvent.change(screen.getByLabelText('End Offset (days from Start Date)'), { target: { value: '5' } });
+
+    fireEvent.click(screen.getByText('Add Recurring Event'));
+
+    expect(alertSpy).toHaveBeenCalledWith('Start Offset must not be after End Offset.');
+    expect(mockOnAddEventDefinition).not.toHaveBeenCalled();
+    alertSpy.mockRestore();
+  });
+
   it('should create a relative recurring event relative to the start date', () => {
     renderForm();
 

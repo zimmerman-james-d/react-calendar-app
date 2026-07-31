@@ -205,4 +205,51 @@ describe('useEventGenerator Hook', () => {
     expect(relativeEvents.length).toBe(2);
     expect(relativeEvents.map(e => e.date).sort()).toEqual(['2025-01-05', '2025-02-20']);
   });
+
+  it('should generate a recurring window relative to the start date', () => {
+    const definitions: EventDefinition[] = [
+      {
+        id: 'def-5', groupId: 'group-5', title: 'Chemo Cycle',
+        recurrence: {
+          weeklySelections: [[1, 3]],
+          recurrenceCycle: 1,
+          relativeToStartDate: { startOffset: 0, endOffset: 14 },
+        }
+      }
+    ];
+    const { result } = renderHook(() => useEventGenerator(definitions, '2025-10-06'));
+    expect(result.current.map(e => e.date)).toEqual(['2025-10-06', '2025-10-08', '2025-10-13', '2025-10-15', '2025-10-20']);
+  });
+
+  it('should shift a recurring window when the start date changes', () => {
+    const definitions: EventDefinition[] = [
+      {
+        id: 'def-6', groupId: 'group-6', title: 'Chemo Cycle',
+        recurrence: {
+          weeklySelections: [[1]],
+          recurrenceCycle: 1,
+          relativeToStartDate: { startOffset: 0, endOffset: 7 },
+        }
+      }
+    ];
+    const { result: before } = renderHook(() => useEventGenerator(definitions, '2025-10-06'));
+    const { result: after } = renderHook(() => useEventGenerator(definitions, '2025-11-03'));
+    expect(before.current.map(e => e.date)).toEqual(['2025-10-06', '2025-10-13']);
+    expect(after.current.map(e => e.date)).toEqual(['2025-11-03', '2025-11-10']);
+  });
+
+  it('should not generate a relative-window recurring series before a start date is set', () => {
+    const definitions: EventDefinition[] = [
+      {
+        id: 'def-7', groupId: 'group-7', title: 'Chemo Cycle',
+        recurrence: {
+          weeklySelections: [[1]],
+          recurrenceCycle: 1,
+          relativeToStartDate: { startOffset: 0, endOffset: 7 },
+        }
+      }
+    ];
+    const { result } = renderHook(() => useEventGenerator(definitions, ''));
+    expect(result.current).toEqual([]);
+  });
 });

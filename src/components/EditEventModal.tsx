@@ -36,6 +36,8 @@ export function EditEventModal({
   const [endRecur, setEndRecur] = useState(eventToEdit?.recurrence?.endRecur || '');
   const [recurrenceCycle, setRecurrenceCycle] = useState(eventToEdit?.recurrence?.recurrenceCycle || 1);
   const [weeklySelections, setWeeklySelections] = useState<number[][]>(eventToEdit?.recurrence?.weeklySelections || Array.from({ length: 1 }, () => []));
+  const [startOffset, setStartOffset] = useState(eventToEdit?.recurrence?.relativeToStartDate?.startOffset ?? 0);
+  const [endOffset, setEndOffset] = useState(eventToEdit?.recurrence?.relativeToStartDate?.endOffset ?? 7);
 
   // Relative Single Event State
   const [relativeOffset, setRelativeOffset] = useState(eventToEdit?.relativeTo?.offset ? Math.abs(eventToEdit.relativeTo.offset) : 1);
@@ -57,10 +59,12 @@ export function EditEventModal({
       if (eventToEdit.date) {
         setSpecificDate(eventToEdit.date);
       } else if (eventToEdit.recurrence) {
-        setStartRecur(eventToEdit.recurrence.startRecur);
-        setEndRecur(eventToEdit.recurrence.endRecur);
+        setStartRecur(eventToEdit.recurrence.startRecur || '');
+        setEndRecur(eventToEdit.recurrence.endRecur || '');
         setRecurrenceCycle(eventToEdit.recurrence.recurrenceCycle);
         setWeeklySelections(eventToEdit.recurrence.weeklySelections);
+        setStartOffset(eventToEdit.recurrence.relativeToStartDate?.startOffset ?? 0);
+        setEndOffset(eventToEdit.recurrence.relativeToStartDate?.endOffset ?? 7);
       } else if (eventToEdit.relativeTo) {
         setRelativeTargetEventId(eventToEdit.relativeTo.targetId);
         setRelativeOffset(Math.abs(eventToEdit.relativeTo.offset));
@@ -110,6 +114,20 @@ export function EditEventModal({
         return;
       }
       updatedDefinition.date = specificDate;
+    } else if (eventToEdit.recurrence?.relativeToStartDate) {
+      if (weeklySelections.every(w => w.length === 0)) {
+        alert('Please fill out all fields for the recurrence.');
+        return;
+      }
+      if (startOffset > endOffset) {
+        alert('Start Offset must not be after End Offset.');
+        return;
+      }
+      updatedDefinition.recurrence = {
+        weeklySelections,
+        recurrenceCycle,
+        relativeToStartDate: { startOffset, endOffset },
+      };
     } else if (eventToEdit.recurrence) {
       if (!startRecur || !endRecur || weeklySelections.every(w => w.length === 0)) {
         alert('Please fill out all fields for the recurrence.');
@@ -203,14 +221,29 @@ export function EditEventModal({
                 </div>
               </div>
             ))}
-            <div className="form-group">
-              <label htmlFor="edit-start-recur">Start Date</label>
-              <input type="date" id="edit-start-recur" value={startRecur} onChange={(e) => setStartRecur(e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label htmlFor="edit-end-recur">End Date</label>
-              <input type="date" id="edit-end-recur" value={endRecur} onChange={(e) => setEndRecur(e.target.value)} />
-            </div>
+            {eventToEdit.recurrence.relativeToStartDate ? (
+              <>
+                <div className="form-group">
+                  <label htmlFor="edit-start-offset">Start Offset (days from Start Date)</label>
+                  <input type="number" id="edit-start-offset" value={startOffset} onChange={(e) => setStartOffset(Number(e.target.value))} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="edit-end-offset">End Offset (days from Start Date)</label>
+                  <input type="number" id="edit-end-offset" value={endOffset} onChange={(e) => setEndOffset(Number(e.target.value))} />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="form-group">
+                  <label htmlFor="edit-start-recur">Start Date</label>
+                  <input type="date" id="edit-start-recur" value={startRecur} onChange={(e) => setStartRecur(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="edit-end-recur">End Date</label>
+                  <input type="date" id="edit-end-recur" value={endRecur} onChange={(e) => setEndRecur(e.target.value)} />
+                </div>
+              </>
+            )}
           </>
         )}
 
