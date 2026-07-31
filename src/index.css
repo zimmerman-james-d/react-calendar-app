@@ -490,12 +490,40 @@
     margin-bottom: 8pt;
   }
 
-  /* Browsers drop background colours and wash out light borders when
-     printing unless asked not to; #ddd grid lines all but disappear. */
+  /* #ddd grid lines all but disappear on paper. Borders print even when
+     backgrounds are dropped, so the grid only needs a darker colour. */
   .fc {
     --fc-border-color: #999;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  }
+
+  /* The filled event chips are a screen affordance and read as noise on
+     paper; print each entry as plain text instead. */
+  .fc-daygrid-event,
+  .fc-daygrid-event .fc-event-main,
+  .fc-h-event,
+  .fc-h-event .fc-event-main {
+    background: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    color: #000 !important;
+  }
+
+  /* Same for the today highlight — but only its fill, or the cell would lose
+     its share of the grid. */
+  .fc .fc-day-today {
+    background: none !important;
+  }
+
+  /* Read as a plain list, one line per treatment, held off the grid line so
+     the text does not collide with the cell border. */
+  .fc-daygrid-event {
+    padding: 0 3pt !important;
+    margin: 0 0 3pt !important;
+  }
+
+  .fc .fc-daygrid-event-harness + .fc-daygrid-event-harness {
+    margin-top: 0;
   }
 
   /* Give every week the same floor so a month fills the sheet, and keep a

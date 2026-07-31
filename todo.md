@@ -8,6 +8,8 @@
 
 - ~~Calendar print view (No sidebar)~~ Done: sidebar/nav hidden, calendar name printed as a heading, month fills the sheet.
 
+- Multi-page print
+
 - Save to encrypted string/qrcode?
 
 ## Holiday & Warning System
