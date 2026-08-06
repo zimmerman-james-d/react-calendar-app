@@ -1,11 +1,22 @@
 import React, { useRef, useState } from 'react';
 import { EventDefinition, SaveData } from '../types';
 import CryptoJS from 'crypto-js';
+
 // The plain 'fflate' entry point resolves to fflate's Node build under this
 // project's tsup config (platform defaults to node16), which pulls in
 // require('worker_threads') support this app never uses and can't run in a
 // browser bundle. Import the browser build explicitly instead.
-import { deflateSync, inflateSync } from 'fflate/browser';
+//
+// ts-jest's TypeScript module resolution doesn't follow package.json
+// "exports" subpaths the way tsup/esbuild does, so it can't resolve this
+// specifier on its own (confirmed working at runtime via a production
+// build + a real browser). Suppressed for the type checker on this one
+// line only; the two functions are re-typed explicitly right below so
+// every call site stays fully type-checked.
+// @ts-expect-error -- see comment above
+import { deflateSync as _deflateSync, inflateSync as _inflateSync } from 'fflate/browser';
+const deflateSync: (data: Uint8Array) => Uint8Array = _deflateSync;
+const inflateSync: (data: Uint8Array) => Uint8Array = _inflateSync;
 import { EncryptionModal } from './EncryptionModal';
 import { CopyTextModal } from './CopyTextModal';
 import { PasteTextModal } from './PasteTextModal';
