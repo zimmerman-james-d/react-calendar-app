@@ -559,20 +559,40 @@
     margin-top: 0;
   }
 
-  /* Give every week the same floor so a month fills the sheet, and keep a
-     week from being split down the middle by a page break. In print, vh is a
-     share of the page area, so this adapts to paper size and orientation. */
+  /* Give every week the same fixed height so six weeks always fill exactly
+     one sheet. This is a ceiling as well as a floor: a day with too many
+     treatments to fit does not grow the row (that would push the rest of
+     the month onto a wasted second page) — instead its text is shrunk by
+     the --print-scale App.tsx computes in the beforeprint handler below.
+     In print, vh is a share of the page area, so this adapts to paper size
+     and orientation. */
   .fc .fc-daygrid-day-frame {
     min-height: 14vh;
+    max-height: 14vh;
+    overflow: hidden;
   }
 
   .fc .fc-daygrid-body tr {
     break-inside: avoid;
   }
 
-  /* On paper there is no hovering to reveal a truncated title, so wrap. */
+  /* On paper there is no hovering to reveal a truncated title, so wrap. A
+     single word too wide for the column (e.g. "Mercaptopurine") used to
+     bleed silently past the cell border; now that the cell clips overflow
+     to enforce the fixed row height, that same word would be cut off
+     mid-letter instead, so it must be allowed to break. */
   .fc-daygrid-event,
   .fc-event-title {
     white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+
+  /* Scoped per day cell by App.tsx so only the overcrowded day shrinks,
+     not the whole calendar. Applied once here, not on .fc-event-title too —
+     em is relative to the inherited (already-scaled) font-size, so scaling
+     both would compound the shrink on every nested element. */
+  .fc-daygrid-event {
+    font-size: calc(1em * var(--print-scale, 1));
+    line-height: 1.25;
   }
 }
