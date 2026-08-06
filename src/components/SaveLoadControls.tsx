@@ -1,12 +1,23 @@
 import React, { useRef, useState } from 'react';
-import { EventDefinition } from '../types';
+import { EventDefinition, SaveData } from '../types';
 import CryptoJS from 'crypto-js';
+// The plain 'fflate' entry point resolves to fflate's Node build under this
+// project's tsup config (platform defaults to node16), which pulls in
+// require('worker_threads') support this app never uses and can't run in a
+// browser bundle. Import the browser build explicitly instead.
+import { deflateSync, inflateSync } from 'fflate/browser';
 import { EncryptionModal } from './EncryptionModal';
+import { CopyTextModal } from './CopyTextModal';
+import { PasteTextModal } from './PasteTextModal';
+import { encodeCompact, decodeCompact } from '../utils/compactSaveFormat';
 
-interface SaveData {
-  calendarName: string;
-  startDate: string;
-  eventDefinitions: EventDefinition[];
+function wordArrayToUint8Array(wordArray: CryptoJS.lib.WordArray): Uint8Array {
+  const { words, sigBytes } = wordArray;
+  const bytes = new Uint8Array(sigBytes);
+  for (let i = 0; i < sigBytes; i++) {
+    bytes[i] = (words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
+  }
+  return bytes;
 }
 
 interface SaveLoadControlsProps {
@@ -42,6 +53,14 @@ export function SaveLoadControls({ eventDefinitions, startDate, calendarName, on
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isLoadModalOpen, setIsLoadModalOpen] = useState(false);
   const [loadedFileContent, setLoadedFileContent] = useState<string | null>(null);
+
+  const [isCopyPasswordModalOpen, setIsCopyPasswordModalOpen] = useState(false);
+  const [isCopyTextModalOpen, setIsCopyTextModalOpen] = useState(false);
+  const [copyText, setCopyText] = useState('');
+
+  const [isPasteTextModalOpen, setIsPasteTextModalOpen] = useState(false);
+  const [isPastePasswordModalOpen, setIsPastePasswordModalOpen] = useState(false);
+  const [pastedContent, setPastedContent] = useState<string | null>(null);
 
   const handleDebugSave = (data: SaveData) => {
     const debugData = {
@@ -151,11 +170,56 @@ export function SaveLoadControls({ eventDefinitions, startDate, calendarName, on
     }
   };
 
+  const handleCopyAsText = (password: string) => {
+    if (eventDefinitions.length === 0 && !startDate && !calendarName) {
+      alert("There is nothing to save.");
+      return;
+    }
+
+    const encoded = encodeCompact({ calendarName, startDate, eventDefinitions });
+    const compressed = deflateSync(encoded);
+    const encrypted = CryptoJS.AES.encrypt(CryptoJS.lib.WordArray.create(compressed), password).toString();
+
+    setCopyText(encrypted);
+    setIsCopyPasswordModalOpen(false);
+    setIsCopyTextModalOpen(true);
+  };
+
+  const handlePasteSubmit = (text: string) => {
+    setPastedContent(text);
+    setIsPasteTextModalOpen(false);
+    setIsPastePasswordModalOpen(true);
+  };
+
+  const handleDecryptAndLoadText = (password: string) => {
+    if (!pastedContent) return;
+
+    try {
+      const decryptedWordArray = CryptoJS.AES.decrypt(pastedContent, password);
+      const decompressed = inflateSync(wordArrayToUint8Array(decryptedWordArray));
+      const loadedData = decodeCompact(decompressed);
+
+      if (typeof loadedData.calendarName === 'string' && typeof loadedData.startDate === 'string' && Array.isArray(loadedData.eventDefinitions)) {
+        onLoad(loadedData);
+      } else {
+        alert("Invalid text format after decryption.");
+      }
+    } catch (error) {
+      alert("Error decrypting text. Please check your password and that you pasted the full text.");
+      console.error("Decryption error:", error);
+    } finally {
+      setIsPastePasswordModalOpen(false);
+      setPastedContent(null);
+    }
+  };
+
   return (
     <>
       <div className="save-load-controls">
         <button onClick={() => setIsSaveModalOpen(true)} className="save-button">Save Calendar</button>
         <button onClick={() => fileInputRef.current?.click()} className="load-button">Load Calendar</button>
+        <button onClick={() => setIsCopyPasswordModalOpen(true)} className="copy-text-button">Copy as Text</button>
+        <button onClick={() => setIsPasteTextModalOpen(true)} className="paste-text-button">Load from Text</button>
         <input
           type="file"
           ref={fileInputRef}
@@ -180,6 +244,35 @@ export function SaveLoadControls({ eventDefinitions, startDate, calendarName, on
           setLoadedFileContent(null);
         }}
         onSubmit={handleDecryptAndLoad}
+        promptText="Enter the password to decrypt your schedule:"
+      />
+
+      <EncryptionModal
+        isOpen={isCopyPasswordModalOpen}
+        onClose={() => setIsCopyPasswordModalOpen(false)}
+        onSubmit={handleCopyAsText}
+        promptText="Enter a password to encrypt your schedule:"
+      />
+
+      <CopyTextModal
+        isOpen={isCopyTextModalOpen}
+        onClose={() => setIsCopyTextModalOpen(false)}
+        text={copyText}
+      />
+
+      <PasteTextModal
+        isOpen={isPasteTextModalOpen}
+        onClose={() => setIsPasteTextModalOpen(false)}
+        onSubmit={handlePasteSubmit}
+      />
+
+      <EncryptionModal
+        isOpen={isPastePasswordModalOpen}
+        onClose={() => {
+          setIsPastePasswordModalOpen(false);
+          setPastedContent(null);
+        }}
+        onSubmit={handleDecryptAndLoadText}
         promptText="Enter the password to decrypt your schedule:"
       />
     </>
