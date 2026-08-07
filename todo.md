@@ -10,7 +10,20 @@
 
 - Multi-page print
 
-- Save to encrypted string/qrcode?
+- ~~Save to encrypted string/qrcode?~~ Done (string half): "Copy as Text" /
+  "Load from Text" let a calendar be copy-pasted (e.g. into Teams) instead of
+  saved to disk, for shared hospital computers without file-write access.
+  Uses a compact binary encoding + deflate + AES, separate from the existing
+  .tclx file format. QR code still open.
+
+- Title compression dictionary: shrink the "Copy as Text" string further by
+  shipping a small preset compression dictionary of common drug/lab/procedure
+  names in the app bundle (deflate can match against it without the words
+  needing to appear in the string itself). Measured ~7-16% additional size
+  reduction in testing, more when more titles match. Not built yet — needs a
+  real curated term list from actual clinical usage, and the encode/decode
+  sides must share the exact same dictionary bytes, so changing it later
+  needs a version bump in compactSaveFormat.tsx's format-version byte.
 
 ## Holiday & Warning System
 - Add Holidays: Implement a feature to add a list of holidays to the calendar.

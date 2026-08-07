@@ -5,6 +5,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { Sidebar } from './Sidebar';
 import { EventDefinition } from './types';
 import { useEventGenerator } from './utils/eventUtils';
+import { shrinkOverflowingPrintDays, clearPrintDayShrink } from './utils/printLayout';
 import { ConfirmationModal } from './components/ConfirmationModal';
 import { EditEventModal } from './components/EditEventModal';
 
@@ -41,8 +42,14 @@ export function App() {
   // starting. Without this it prints its on-screen scrolling layout, so the
   // header row and the day grid end up measured against different widths.
   useEffect(() => {
-    const handleBeforePrint = () => calendarRef.current?.getApi().trigger('_beforeprint');
-    const handleAfterPrint = () => calendarRef.current?.getApi().trigger('_afterprint');
+    const handleBeforePrint = () => {
+      calendarRef.current?.getApi().trigger('_beforeprint');
+      shrinkOverflowingPrintDays();
+    };
+    const handleAfterPrint = () => {
+      calendarRef.current?.getApi().trigger('_afterprint');
+      clearPrintDayShrink();
+    };
 
     window.addEventListener('beforeprint', handleBeforePrint);
     window.addEventListener('afterprint', handleAfterPrint);

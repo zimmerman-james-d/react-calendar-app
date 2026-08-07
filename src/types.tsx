@@ -42,5 +42,11 @@ export interface EventDefinition {
 
   // --- Exceptions ---
   // Stores modifications to specific instances of a recurring event
-  exceptions?: Record<string, string>; 
+  exceptions?: Record<string, string>;
+}
+
+export interface SaveData {
+  calendarName: string;
+  startDate: string;
+  eventDefinitions: EventDefinition[];
 }
