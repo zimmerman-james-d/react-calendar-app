@@ -183,8 +183,8 @@ describe('RecurringEventForm Component', () => {
     fireEvent.click(screen.getByText('Mon'));
     fireEvent.click(screen.getByText('Wed'));
 
-    fireEvent.change(screen.getByLabelText('Start Offset (days from Start Date)'), { target: { value: '0' } });
-    fireEvent.change(screen.getByLabelText('End Offset (days from Start Date)'), { target: { value: '84' } });
+    fireEvent.change(screen.getByLabelText('Start Day (protocol day)'), { target: { value: '1' } });
+    fireEvent.change(screen.getByLabelText('End Day (protocol day)'), { target: { value: '85' } });
 
     fireEvent.click(screen.getByText('Add Recurring Event'));
 
@@ -207,12 +207,12 @@ describe('RecurringEventForm Component', () => {
     fireEvent.change(screen.getByLabelText('Event Name'), { target: { value: 'Invalid Window' } });
     fireEvent.change(screen.getByLabelText('Repeats Every'), { target: { value: '1' } });
     fireEvent.click(screen.getByText('Mon'));
-    fireEvent.change(screen.getByLabelText('Start Offset (days from Start Date)'), { target: { value: '10' } });
-    fireEvent.change(screen.getByLabelText('End Offset (days from Start Date)'), { target: { value: '5' } });
+    fireEvent.change(screen.getByLabelText('Start Day (protocol day)'), { target: { value: '11' } });
+    fireEvent.change(screen.getByLabelText('End Day (protocol day)'), { target: { value: '6' } });
 
     fireEvent.click(screen.getByText('Add Recurring Event'));
 
-    expect(alertSpy).toHaveBeenCalledWith('Start Offset must not be after End Offset.');
+    expect(alertSpy).toHaveBeenCalledWith('Start Day must not be after End Day.');
     expect(mockOnAddEventDefinition).not.toHaveBeenCalled();
     alertSpy.mockRestore();
   });
