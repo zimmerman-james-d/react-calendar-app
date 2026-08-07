@@ -53,9 +53,9 @@ exports[`formatRecurrenceRule should format a recurrence rule relative to the st
     <span>
       <React.Fragment>
         Day 
-        0
+        1
          to Day 
-        84
+        85
          (from Start Date)
       </React.Fragment>
     </span>

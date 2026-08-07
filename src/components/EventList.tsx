@@ -23,7 +23,7 @@ export function formatRecurrenceRule(definition: EventDefinition, allDefinitions
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span>
             {relativeToStartDate
-              ? <>Day {relativeToStartDate.startOffset} to Day {relativeToStartDate.endOffset} (from Start Date)</>
+              ? <>Day {relativeToStartDate.startOffset + 1} to Day {relativeToStartDate.endOffset + 1} (protocol day)</>
               : <>{startRecur} - {endRecur}</>}
           </span>
           <span style={{ textAlign: 'right' }}>{recurrenceCycle} Week{recurrenceCycle > 1 ? 's' : ''}</span>

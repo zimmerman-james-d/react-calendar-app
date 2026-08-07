@@ -84,7 +84,7 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
                 return;
             }
             if (startOffset > endOffset) {
-                alert('Start Offset must not be after End Offset.');
+                alert('Start Day must not be after End Day.');
                 return;
             }
             newDefinition.recurrence = {
@@ -195,12 +195,12 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
                     {dateType === 'relative-start-window' && (
                         <>
                             <div className="form-group">
-                                <label htmlFor="start-offset">Start Offset (days from Start Date)</label>
-                                <input type="number" id="start-offset" value={startOffset} onChange={(e) => setStartOffset(Number(e.target.value))} />
+                                <label htmlFor="start-offset">Start Day (protocol day)</label>
+                                <input type="number" id="start-offset" value={startOffset + 1} onChange={(e) => setStartOffset(Number(e.target.value) - 1)} />
                             </div>
                             <div className="form-group">
-                                <label htmlFor="end-offset">End Offset (days from Start Date)</label>
-                                <input type="number" id="end-offset" value={endOffset} onChange={(e) => setEndOffset(Number(e.target.value))} />
+                                <label htmlFor="end-offset">End Day (protocol day)</label>
+                                <input type="number" id="end-offset" value={endOffset + 1} onChange={(e) => setEndOffset(Number(e.target.value) - 1)} />
                             </div>
                         </>
                     )}

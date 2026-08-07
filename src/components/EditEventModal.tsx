@@ -120,7 +120,7 @@ export function EditEventModal({
         return;
       }
       if (startOffset > endOffset) {
-        alert('Start Offset must not be after End Offset.');
+        alert('Start Day must not be after End Day.');
         return;
       }
       updatedDefinition.recurrence = {
@@ -224,12 +224,12 @@ export function EditEventModal({
             {eventToEdit.recurrence.relativeToStartDate ? (
               <>
                 <div className="form-group">
-                  <label htmlFor="edit-start-offset">Start Offset (days from Start Date)</label>
-                  <input type="number" id="edit-start-offset" value={startOffset} onChange={(e) => setStartOffset(Number(e.target.value))} />
+                  <label htmlFor="edit-start-offset">Start Day (protocol day)</label>
+                  <input type="number" id="edit-start-offset" value={startOffset + 1} onChange={(e) => setStartOffset(Number(e.target.value) - 1)} />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="edit-end-offset">End Offset (days from Start Date)</label>
-                  <input type="number" id="edit-end-offset" value={endOffset} onChange={(e) => setEndOffset(Number(e.target.value))} />
+                  <label htmlFor="edit-end-offset">End Day (protocol day)</label>
+                  <input type="number" id="edit-end-offset" value={endOffset + 1} onChange={(e) => setEndOffset(Number(e.target.value) - 1)} />
                 </div>
               </>
             ) : (
