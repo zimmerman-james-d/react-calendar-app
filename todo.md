@@ -1,10 +1,10 @@
 # To-Do List for Calendar Features
 ## Core Functionality
-- Dynamic Event Updates: Ensure that if an event is moved, any other events that are relative to it automatically update their positions on the calendar.
+- ~~Dynamic Event Updates~~ Done: Ensure that if an event is moved, any other events that are relative to it automatically update their positions on the calendar.
 
-- Event Edit
+- ~~Event Edit~~ Done
 
-- Session Storage: Persist the event list through page refreshes and navigating away from the page.
+- ~~Session Storage~~ Done: Persist the event list through page refreshes and navigating away from the page.
 
 - ~~Calendar print view (No sidebar)~~ Done: sidebar/nav hidden, calendar name printed as a heading, month fills the sheet.
 
@@ -33,12 +33,12 @@
 - Saving Holidays: Allow the user's custom holiday list to be saved and loaded.
 
 ## Data Management & Export
-- iCal Export: Add a feature to export the event schedule to a standard .ics file.
+- **SHELVED** — iCal Export / Google Calendar Export: Add a feature to export the event schedule to a standard .ics file (which would also cover Google Calendar, since it accepts .ics via its own Import feature — no separate OAuth/API integration needed). Shelved for the same reason as the QR handoff spike below: a patient's schedule can include COG (Children's Oncology Group) clinical trial protocol details, and handing the patient a physical paper calendar is a single object with no further copies, while any digital export (.ics file, calendar link) can be re-uploaded, forwarded, or fed into chatbots/other tooling once it leaves this app — a categorically bigger leak surface than paper. Same logic would block any other "hand the patient a digital copy" feature (email, cloud sync, etc.), not just QR/iCal specifically.
 
-- Google Calendar Export: Add a feature to export events directly to a user's Google Calendar.
+- **SHELVED** — Spike: QR-code calendar handoff. Idea was to print a QR code on the first month's printout (using the first/last empty day) encoding the ICS data, so a patient can scan it with their phone and have the schedule populate directly instead of being handed a paper calendar. Shelved for the confidentiality reason above.
 
 ## UI/UX
-- Fix Choppy Calendar Resize: Smooth out the animation when the sidebar expands and collapses.
+- ~~Fix Choppy Calendar Resize~~ Done: Smooth out the animation when the sidebar expands and collapses.
 
 - ~~Fix limited number of items displayed in editable fields.~~ Done: the "All Events" accordion had a fixed 900px `max-height` with `overflow: hidden`, which silently clipped and made unclickable any items past roughly the 12th — now the open state scrolls (`overflow-y: auto`) instead of clipping.
 

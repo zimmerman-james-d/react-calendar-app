@@ -3,18 +3,31 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { Sidebar } from './Sidebar';
-import { EventDefinition } from './types';
+import { EventDefinition, SaveData } from './types';
 import { useEventGenerator } from './utils/eventUtils';
 import { shrinkOverflowingPrintDays, clearPrintDayShrink } from './utils/printLayout';
 import { ConfirmationModal } from './components/ConfirmationModal';
 import { EditEventModal } from './components/EditEventModal';
 
+const SESSION_STORAGE_KEY = 'calendar-app-session';
+
+function loadSessionState(): SaveData | null {
+  try {
+    const raw = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
-  const [eventDefinitions, setEventDefinitions] = useState<EventDefinition[]>([]);
-  const [startDate, setStartDate] = useState<string>('');
-  const [calendarName, setCalendarName] = useState<string>('');
+  const [sessionState] = useState(loadSessionState);
+  const [eventDefinitions, setEventDefinitions] = useState<EventDefinition[]>(sessionState?.eventDefinitions ?? []);
+  const [startDate, setStartDate] = useState<string>(sessionState?.startDate ?? '');
+  const [calendarName, setCalendarName] = useState<string>(sessionState?.calendarName ?? '');
   const calendarRef = useRef<FullCalendar>(null);
+  const calendarContainerRef = useRef<HTMLDivElement>(null);
 
   // State for confirmation modal
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -29,14 +42,35 @@ export function App() {
   const calendarEvents = useEventGenerator(eventDefinitions, startDate);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (calendarRef.current) {
-        calendarRef.current.getApi().updateSize();
-      }
-    }, 350);
+    const data: SaveData = { calendarName, startDate, eventDefinitions };
+    sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(data));
+  }, [calendarName, startDate, eventDefinitions]);
 
-    return () => clearTimeout(timer);
-  }, [isSidebarOpen]);
+  // The sidebar's width animates via CSS transition, and FullCalendar sits
+  // in the flex sibling that gets squeezed/stretched as that plays out. A
+  // ResizeObserver lets FullCalendar re-measure on every frame of that
+  // transition instead of jumping to its final size once after a fixed
+  // delay, which is what caused the choppy resize.
+  useEffect(() => {
+    const container = calendarContainerRef.current;
+    if (!container || typeof ResizeObserver === 'undefined') return;
+
+    let frame: number | null = null;
+    const observer = new ResizeObserver(() => {
+      if (frame !== null) return;
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        calendarRef.current?.getApi().updateSize();
+      });
+    });
+
+    observer.observe(container);
+
+    return () => {
+      observer.disconnect();
+      if (frame !== null) cancelAnimationFrame(frame);
+    };
+  }, []);
 
   // FullCalendar only lays itself out for paper when it is told a print is
   // starting. Without this it prints its on-screen scrolling layout, so the
@@ -204,7 +238,7 @@ export function App() {
       
       <div className="main-content">
         {calendarName && <h1 className="print-title">{calendarName}</h1>}
-        <div className="calendar-container">
+        <div className="calendar-container" ref={calendarContainerRef}>
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, interactionPlugin]}
