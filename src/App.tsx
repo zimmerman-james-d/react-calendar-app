@@ -39,6 +39,9 @@ export function App() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [eventToEdit, setEventToEdit] = useState<EventDefinition | null>(null);
 
+  // State for new-calendar confirmation
+  const [isNewCalendarConfirmOpen, setIsNewCalendarConfirmOpen] = useState(false);
+
   const calendarEvents = useEventGenerator(eventDefinitions, startDate);
 
   useEffect(() => {
@@ -210,6 +213,13 @@ export function App() {
     setEventToEdit(null);
   };
 
+  const handleConfirmNewCalendar = () => {
+    setCalendarName('');
+    setStartDate('');
+    setEventDefinitions([]);
+    setIsNewCalendarConfirmOpen(false);
+  };
+
   const handleLoad = (loadedData: { calendarName: string, startDate: string, eventDefinitions: EventDefinition[] }) => {
     setCalendarName(loadedData.calendarName);
     setStartDate(loadedData.startDate);
@@ -234,8 +244,9 @@ export function App() {
         onRestoreEventDefinition={handleRestoreEventDefinition}
         onPermanentDeleteEventDefinition={handlePermanentDeleteEventDefinition}
         onEditEventDefinition={handleEditEventDefinition}
+        onRequestNewCalendar={() => setIsNewCalendarConfirmOpen(true)}
       />
-      
+
       <div className="main-content">
         {calendarName && <h1 className="print-title">{calendarName}</h1>}
         <div className="calendar-container" ref={calendarContainerRef}>
@@ -258,6 +269,17 @@ export function App() {
           message={confirmModalMessage}
           onConfirm={handleConfirmDependentDelete}
           onCancel={handleCancelDependentDelete}
+        />
+      )}
+
+      {/* New Calendar Confirmation Modal */}
+      {isNewCalendarConfirmOpen && (
+        <ConfirmationModal
+          isOpen={isNewCalendarConfirmOpen}
+          message="This will permanently delete the current calendar name, start date, and all events. This cannot be undone. Continue?"
+          confirmLabel="Start New Calendar"
+          onConfirm={handleConfirmNewCalendar}
+          onCancel={() => setIsNewCalendarConfirmOpen(false)}
         />
       )}
 

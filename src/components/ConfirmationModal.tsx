@@ -5,9 +5,10 @@ interface ConfirmationModalProps {
   message: string;
   onConfirm: () => void;
   onCancel: () => void;
+  confirmLabel?: string;
 }
 
-export function ConfirmationModal({ isOpen, message, onConfirm, onCancel }: ConfirmationModalProps) {
+export function ConfirmationModal({ isOpen, message, onConfirm, onCancel, confirmLabel = 'Delete' }: ConfirmationModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -16,7 +17,7 @@ export function ConfirmationModal({ isOpen, message, onConfirm, onCancel }: Conf
         <h4>Confirmation</h4>
         <p>{message}</p>
         <div className="modal-actions">
-          <button className="modal-button submit" onClick={onConfirm}>Delete</button>
+          <button className="modal-button submit" onClick={onConfirm}>{confirmLabel}</button>
           <button className="modal-button cancel" onClick={onCancel}>Cancel</button>
         </div>
       </div>
