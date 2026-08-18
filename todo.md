@@ -40,6 +40,10 @@
 ## UI/UX
 - Fix Choppy Calendar Resize: Smooth out the animation when the sidebar expands and collapses.
 
+- ~~Fix limited number of items displayed in editable fields.~~ Done: the "All Events" accordion had a fixed 900px `max-height` with `overflow: hidden`, which silently clipped and made unclickable any items past roughly the 12th — now the open state scrolls (`overflow-y: auto`) instead of clipping.
+
 - ~~Fix bad print lines~~ Done: the doubled column rules came from the header
   table and day grid being forced to different widths by the `98vw` print
   overrides; FullCalendar is now switched into its own print mode instead.
+
+  
