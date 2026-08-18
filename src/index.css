@@ -30,6 +30,7 @@
   background-color: #f5f5f5;
   padding: 0 20px 0 20px;
   transition: width 0.3s ease;
+  will-change: width;
   width: 300px;
   height: 100%;
   white-space: nowrap;
@@ -106,6 +107,31 @@
   font-weight: bold;
   margin-bottom: 5px;
   color: #333;
+}
+
+.top-level-form-group label:has(.new-calendar-button) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.new-calendar-button {
+  font-weight: normal;
+  font-size: 0.75em;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 4px;
+  background-color: #2c3e50;
+  color: white;
+  cursor: pointer;
+}
+
+.new-calendar-button:hover {
+  background-color: #3a506b;
+}
+
+.new-calendar-button:hover {
+  background-color: #f0f0f0;
 }
 
 .form-group input,

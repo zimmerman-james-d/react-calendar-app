@@ -22,6 +22,7 @@ interface SidebarProps {
     onRestoreEventDefinition: (id: string) => void;
     onPermanentDeleteEventDefinition: (id: string) => void;
     onEditEventDefinition: (definition: EventDefinition) => void;
+    onRequestNewCalendar: () => void;
 }
 
 export function Sidebar({
@@ -38,16 +39,27 @@ export function Sidebar({
     onRemoveEventDefinition,
     onRestoreEventDefinition,
     onPermanentDeleteEventDefinition,
-    onEditEventDefinition // New prop
+    onEditEventDefinition, // New prop
+    onRequestNewCalendar
 }: SidebarProps) {
     return (
         <div className={`sidebar-container ${isOpen ? 'open' : 'closed'}`}>
             <div className="sidebar">
                 <div className="sidebar-header">
                     <div className="top-level-form-group">
-                        <label htmlFor="calendar-name">Calendar Name</label>
-                        <input 
-                            type="text" 
+                        <label htmlFor="calendar-name">
+                            Calendar Name
+                            <button
+                                type="button"
+                                onClick={onRequestNewCalendar}
+                                className="new-calendar-button"
+                                title="Start a new calendar (clears everything)"
+                            >
+                                New
+                            </button>
+                        </label>
+                        <input
+                            type="text"
                             id="calendar-name"
                             value={calendarName}
                             onChange={(e) => onCalendarNameChange(e.target.value)}
