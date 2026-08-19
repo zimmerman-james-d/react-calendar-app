@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -6,8 +6,10 @@ import { Sidebar } from './Sidebar';
 import { EventDefinition, SaveData } from './types';
 import { useEventGenerator } from './utils/eventUtils';
 import { shrinkOverflowingPrintDays, clearPrintDayShrink } from './utils/printLayout';
+import { getPrintMonths } from './utils/printMonths';
 import { ConfirmationModal } from './components/ConfirmationModal';
 import { EditEventModal } from './components/EditEventModal';
+import { PrintMonths } from './components/PrintMonths';
 
 const SESSION_STORAGE_KEY = 'calendar-app-session';
 
@@ -28,6 +30,7 @@ export function App() {
   const [calendarName, setCalendarName] = useState<string>(sessionState?.calendarName ?? '');
   const calendarRef = useRef<FullCalendar>(null);
   const calendarContainerRef = useRef<HTMLDivElement>(null);
+  const printCalendarRefsRef = useRef<(FullCalendar | null)[]>([]);
 
   // State for confirmation modal
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -43,6 +46,7 @@ export function App() {
   const [isNewCalendarConfirmOpen, setIsNewCalendarConfirmOpen] = useState(false);
 
   const calendarEvents = useEventGenerator(eventDefinitions, startDate);
+  const printMonths = useMemo(() => getPrintMonths(startDate, calendarEvents), [startDate, calendarEvents]);
 
   useEffect(() => {
     const data: SaveData = { calendarName, startDate, eventDefinitions };
@@ -80,11 +84,24 @@ export function App() {
   // header row and the day grid end up measured against different widths.
   useEffect(() => {
     const handleBeforePrint = () => {
-      calendarRef.current?.getApi().trigger('_beforeprint');
+      if (printMonths) {
+        if (!calendarName.trim()) {
+          window.alert(
+            "This calendar has no name set. Every page of the printed plan will be unlabeled, which makes a lost or separated page hard to identify. You can continue printing without one."
+          );
+        }
+        printCalendarRefsRef.current.forEach(instance => instance?.getApi().trigger('_beforeprint'));
+      } else {
+        calendarRef.current?.getApi().trigger('_beforeprint');
+      }
       shrinkOverflowingPrintDays();
     };
     const handleAfterPrint = () => {
-      calendarRef.current?.getApi().trigger('_afterprint');
+      if (printMonths) {
+        printCalendarRefsRef.current.forEach(instance => instance?.getApi().trigger('_afterprint'));
+      } else {
+        calendarRef.current?.getApi().trigger('_afterprint');
+      }
       clearPrintDayShrink();
     };
 
@@ -95,7 +112,7 @@ export function App() {
       window.removeEventListener('beforeprint', handleBeforePrint);
       window.removeEventListener('afterprint', handleAfterPrint);
     };
-  }, []);
+  }, [printMonths, calendarName]);
 
   const handleAddEventDefinition = (newDefinition: EventDefinition) => {
     setEventDefinitions(prev => [...prev, newDefinition]);
@@ -247,8 +264,8 @@ export function App() {
         onRequestNewCalendar={() => setIsNewCalendarConfirmOpen(true)}
       />
 
-      <div className="main-content">
-        {calendarName && <h1 className="print-title">{calendarName}</h1>}
+      <div className={`main-content${printMonths ? ' print-multipage-active' : ''}`}>
+        {!printMonths && calendarName && <h1 className="print-title">{calendarName}</h1>}
         <div className="calendar-container" ref={calendarContainerRef}>
           <FullCalendar
             ref={calendarRef}
@@ -260,6 +277,14 @@ export function App() {
             events={calendarEvents}
           />
         </div>
+        {printMonths && (
+          <PrintMonths
+            months={printMonths}
+            calendarName={calendarName}
+            events={calendarEvents}
+            registerRef={(index, instance) => { printCalendarRefsRef.current[index] = instance; }}
+          />
+        )}
       </div>
 
       {/* Confirmation Modal */}
