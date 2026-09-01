@@ -10,6 +10,29 @@ function byTitle(defs: EventDefinition[], title: string): EventDefinition {
 }
 
 describe('compactSaveFormat round-trip', () => {
+  it('round-trips the negative start-relative offsets a rebase produces', () => {
+    // A rebase that cuts a recurring window mid-flight leaves the window
+    // starting before day 1, and drops the past as a soft delete.
+    const data: SaveData = {
+      calendarName: 'Rebased',
+      startDate: '2026-09-28',
+      eventDefinitions: [
+        { id: 'a', groupId: 'g', title: 'Mercaptopurine by mouth',
+          recurrence: { weeklySelections: [[0, 1, 2, 3, 4, 5, 6]], recurrenceCycle: 1,
+                        relativeToStartDate: { startOffset: -14, endOffset: 13 } } },
+        { id: 'b', title: 'Dropped block', deleted: true,
+          relativeTo: { targetId: 'start-date', offset: -20 } },
+      ],
+    };
+
+    const decoded = decodeCompact(encodeCompact(data));
+
+    expect(byTitle(decoded.eventDefinitions, 'Mercaptopurine by mouth').recurrence!.relativeToStartDate)
+      .toEqual({ startOffset: -14, endOffset: 13 });
+    expect(byTitle(decoded.eventDefinitions, 'Dropped block').relativeTo!.offset).toBe(-20);
+    expect(byTitle(decoded.eventDefinitions, 'Dropped block').deleted).toBe(true);
+  });
+
   it('round-trips an empty calendar', () => {
     const data: SaveData = { calendarName: 'Empty', startDate: '2026-07-30', eventDefinitions: [] };
     const decoded = decodeCompact(encodeCompact(data));

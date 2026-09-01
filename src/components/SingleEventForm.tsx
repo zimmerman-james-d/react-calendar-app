@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { EventDefinition } from '../types';
+import { MAX_DAY_NUMBER, clampDayOffset } from '../utils/dayLimits';
 import { EventInput } from '@fullcalendar/core';
 
 interface SingleEventFormProps {
@@ -82,8 +83,10 @@ export function SingleEventForm({ onAddEventDefinition, events, startDate }: Sin
                         <input 
                             type="number" 
                             className="relative-offset-input"
+                            min={0}
+                            max={MAX_DAY_NUMBER}
                             value={relativeOffset}
-                            onChange={(e) => setRelativeOffset(Number(e.target.value))}
+                            onChange={(e) => setRelativeOffset(clampDayOffset(Number(e.target.value)))}
                             disabled={relativeDirection === 'same'}
                         />
                         <select className="relative-direction-select" value={relativeDirection} onChange={(e) => setRelativeDirection(e.target.value as any)}>

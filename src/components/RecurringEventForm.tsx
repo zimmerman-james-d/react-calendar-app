@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { EventDefinition } from '../types';
+import { MAX_DAY_NUMBER, clampDayNumber, clampDayOffset } from '../utils/dayLimits';
 
 interface RecurringEventFormProps {
     onAddEventDefinition: (definition: EventDefinition) => void;
@@ -196,11 +197,11 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
                         <>
                             <div className="form-group">
                                 <label htmlFor="start-offset">Start Day (protocol day)</label>
-                                <input type="number" id="start-offset" value={startOffset + 1} onChange={(e) => setStartOffset(Number(e.target.value) - 1)} />
+                                <input type="number" id="start-offset" min={1} max={MAX_DAY_NUMBER} value={startOffset + 1} onChange={(e) => setStartOffset(clampDayNumber(Number(e.target.value)) - 1)} />
                             </div>
                             <div className="form-group">
                                 <label htmlFor="end-offset">End Day (protocol day)</label>
-                                <input type="number" id="end-offset" value={endOffset + 1} onChange={(e) => setEndOffset(Number(e.target.value) - 1)} />
+                                <input type="number" id="end-offset" min={1} max={MAX_DAY_NUMBER} value={endOffset + 1} onChange={(e) => setEndOffset(clampDayNumber(Number(e.target.value)) - 1)} />
                             </div>
                         </>
                     )}
@@ -234,12 +235,12 @@ export function RecurringEventForm({ onAddEventDefinition, eventDefinitions }: R
                     </div>
                     <div className="relative-option-group">
                         <input type="checkbox" id="days-before-check" checked={isDaysBeforeEnabled} onChange={() => setIsDaysBeforeEnabled(!isDaysBeforeEnabled)} />
-                        <input type="number" value={daysBefore} onChange={(e) => setDaysBefore(Number(e.target.value))} disabled={!isDaysBeforeEnabled} />
+                        <input type="number" min={0} max={MAX_DAY_NUMBER} value={daysBefore} onChange={(e) => setDaysBefore(clampDayOffset(Number(e.target.value)))} disabled={!isDaysBeforeEnabled} />
                         <label htmlFor="days-before-check">Days Before</label>
                     </div>
                     <div className="relative-option-group">
                         <input type="checkbox" id="days-after-check" checked={isDaysAfterEnabled} onChange={() => setIsDaysAfterEnabled(!isDaysAfterEnabled)} />
-                        <input type="number" value={daysAfter} onChange={(e) => setDaysAfter(Number(e.target.value))} disabled={!isDaysAfterEnabled} />
+                        <input type="number" min={0} max={MAX_DAY_NUMBER} value={daysAfter} onChange={(e) => setDaysAfter(clampDayOffset(Number(e.target.value)))} disabled={!isDaysAfterEnabled} />
                         <label htmlFor="days-after-check">Days After</label>
                     </div>
                     <div className="relative-option-group">

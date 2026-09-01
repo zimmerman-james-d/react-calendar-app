@@ -25,6 +25,42 @@
   sides must share the exact same dictionary bytes, so changing it later
   needs a version bump in compactSaveFormat.tsx's format-version byte.
 
+- ~~Rebase start date~~ Done: a "Rebase" button beside Start Date drops
+  everything before a chosen day (entered as a protocol day number by default,
+  or as a date) and renumbers that day as day 1, for when treatment is delayed
+  because a patient missed counts. The rebase itself moves nothing on the
+  calendar; pushing the resumed schedule out by the delay is a normal Start Date
+  edit afterwards.
+
+  Dropped events are frozen to the real dates they actually fell on and
+  soft-deleted, rather than kept as offsets from a day 1 they are no longer part
+  of. Freezing is what makes the deleted list readable, lets a wrong rebase be
+  undone from "All Events" exactly where things were, and — most importantly —
+  stops the dropped past from sliding forward when the Start Date is then
+  changed to apply the delay. Invariant: nothing in the deleted list is measured
+  against day 1, so nothing there ever moves.
+
+  A recurring series running across the cut is split into a frozen past half
+  (a new `dropped-`-prefixed definition, keeping its original real start date)
+  and a live half that keeps the original definition and group ids so events
+  written relative to its instances or its group keep resolving. The live half's
+  window now opens on the cut date, which re-anchors the recurrence cycle, so
+  its weeklySelections are rotated by the number of weeks the anchor moved —
+  otherwise a multi-week cycle would silently fire on the wrong weeks. See
+  rotateForNewWindowStart in utils/rebaseStartDate.ts.
+
+  Events pinned to literal dates cannot follow the later Start Date shift, so
+  the confirmation lists them for a manual look.
+
+- ~~Instance-relative events lost on start-date change~~ Done (found while
+  building the rebase): an event written relative to one instance of a
+  recurring series stores its target as the series id plus that instance's
+  literal date, so moving the start date left the reference dangling and the
+  event vanished from the calendar with no warning. On the real AALL1231
+  sample this silently deleted both "Check Counts Locally (Need ANC >=750)"
+  draws — the count checks that gate each treatment block. The embedded date
+  is now rewritten by the same shift.
+
 ## Holiday & Warning System
 - Add Holidays: Implement a feature to add a list of holidays to the calendar.
 
