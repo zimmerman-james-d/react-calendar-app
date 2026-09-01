@@ -28,8 +28,9 @@ Printing covers the whole treatment plan instead of just the on-screen month: on
 
 ## Relevant code
 
-- `src/App.tsx:78-96` — `beforeprint`/`afterprint` handling, FullCalendar print hooks
-- `src/App.tsx:251` — print-only calendar-name heading (currently conditional on non-empty name)
+- `src/App.tsx:87-120` — `beforeprint`/`afterprint` handling, FullCalendar print hooks
+- `src/App.tsx:291` — print-only calendar-name heading for the single-month fallback path (conditional on a non-empty name); the per-month pages carry their own in `src/components/PrintMonths.tsx`
+- `src/components/PrintMonths.tsx` — the one-page-per-month calendars; `fixedWeekCount={false}` is what lets a month render only the weeks it spans
 - `src/utils/printLayout.ts` — shrink-to-fit / legibility-floor spill logic (per-month, needs to run per rendered month)
 - `src/utils/eventUtils.tsx` — event generation; `startDate` is the plan anchor, separate from any event
-- `src/index.css:510-639` — `@media print` rules, including the fixed week-row height that makes one month fill one page
+- `src/index.css:510-697` — `@media print` rules, including the week-row height that divides one sheet of grid across a month's 4–6 rows so every month fills its page
