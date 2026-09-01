@@ -614,11 +614,12 @@
     background: none !important;
   }
 
-  /* Leading/trailing days from adjacent months fill out the 6-week grid and
-     are already greyed out (fc-day-other) to mark them as not part of this
-     page's month. Printing their events too would duplicate content that
-     also prints on that neighboring month's own page, and clutters a cell
-     that's meant to read as empty. The date number stays for grid shape. */
+  /* Leading/trailing days from adjacent months fill out the partial first
+     and last weeks of the grid and are already greyed out (fc-day-other) to
+     mark them as not part of this page's month. Printing their events too
+     would duplicate content that also prints on that neighboring month's
+     own page, and clutters a cell that's meant to read as empty. The date
+     number stays for grid shape. */
   .fc-day-other .fc-daygrid-day-events {
     display: none;
   }
@@ -634,16 +635,36 @@
     margin-top: 0;
   }
 
-  /* Give every week the same fixed height so six weeks always fill exactly
-     one sheet. This is a ceiling as well as a floor: a day with too many
+  /* One sheet's worth of grid, split evenly across however many weeks the
+     month actually spans, so every month fills its page whether it needs
+     four rows or six. In print, vh is a share of the page area, so this
+     adapts to paper size and orientation. */
+  .fc {
+    --print-grid-height: 84vh;
+    --print-week-rows: 6;
+  }
+
+  /* No 6th row rendered means the month spans 5 weeks; no 5th means 4. Both
+     rules match a 4-week month, so the 4-week one comes last and wins.
+     Counting the rows FullCalendar actually drew — rather than recomputing
+     the month's shape in JS — means this can't drift out of agreement with
+     the grid it is sizing. Where :has() is unsupported neither rule matches,
+     the default of 6 stands, and months print at the old fixed height. */
+  .fc:not(:has(.fc-daygrid-body tbody > tr:nth-child(6))) {
+    --print-week-rows: 5;
+  }
+
+  .fc:not(:has(.fc-daygrid-body tbody > tr:nth-child(5))) {
+    --print-week-rows: 4;
+  }
+
+  /* The row height is a ceiling as well as a floor: a day with too many
      treatments to fit does not grow the row (that would push the rest of
      the month onto a wasted second page) — instead its text is shrunk by
-     the --print-scale App.tsx computes in the beforeprint handler below.
-     In print, vh is a share of the page area, so this adapts to paper size
-     and orientation. */
+     the --print-scale App.tsx computes in the beforeprint handler below. */
   .fc .fc-daygrid-day-frame {
-    min-height: 14vh;
-    max-height: 14vh;
+    min-height: calc(var(--print-grid-height) / var(--print-week-rows));
+    max-height: calc(var(--print-grid-height) / var(--print-week-rows));
     overflow: hidden;
   }
   

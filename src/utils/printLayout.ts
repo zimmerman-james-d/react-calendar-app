@@ -1,8 +1,10 @@
-// Each day cell gets a fixed height in print (see the .fc-daygrid-day-frame
-// rule in index.css) so six weeks always fill exactly one sheet. A day with
-// too many treatments to fit at full size shrinks its own event text instead
-// of growing the row, which would otherwise push the rest of the month onto
-// a mostly-blank second page.
+// Every day cell in a month is clamped to the same height in print (see the
+// .fc-daygrid-day-frame rule in index.css), that height being one sheet of
+// grid divided by however many week rows the month spans — so a month always
+// fills exactly one sheet, whether it needs four rows or six. A day with too
+// many treatments to fit at full size shrinks its own event text instead of
+// growing the row, which would otherwise push the rest of the month onto a
+// mostly-blank second page.
 //
 // This is a printed chemo schedule: a dose silently clipped off the page is
 // far worse than tiny text or a stray second page, so the floor here is a

@@ -23,6 +23,12 @@ export function PrintMonths({ months, calendarName, events, registerRef }: Print
             initialView="dayGridMonth"
             initialDate={new Date(printMonth.year, printMonth.month, 1)}
             headerToolbar={{ left: '', center: 'title', right: '' }}
+            // FullCalendar pads every month out to six week rows by default.
+            // On paper that spends a sixth of the sheet on a row of greyed-out
+            // next-month dates and squeezes the real weeks to make room for it.
+            // Rendering only the weeks the month spans lets the print CSS
+            // divide the sheet across 4, 5 or 6 rows instead.
+            fixedWeekCount={false}
             height="auto"
             weekends={true}
             events={events}
