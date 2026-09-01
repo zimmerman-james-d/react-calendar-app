@@ -10,6 +10,8 @@ import { getPrintMonths } from './utils/printMonths';
 import { ConfirmationModal } from './components/ConfirmationModal';
 import { EditEventModal } from './components/EditEventModal';
 import { PrintMonths } from './components/PrintMonths';
+import { RebaseStartDateModal } from './components/RebaseStartDateModal';
+import { remapInstanceReferences } from './utils/startDateShift';
 
 const SESSION_STORAGE_KEY = 'calendar-app-session';
 
@@ -44,6 +46,9 @@ export function App() {
 
   // State for new-calendar confirmation
   const [isNewCalendarConfirmOpen, setIsNewCalendarConfirmOpen] = useState(false);
+
+  // State for the start-date rebase modal
+  const [isRebaseModalOpen, setIsRebaseModalOpen] = useState(false);
 
   const calendarEvents = useEventGenerator(eventDefinitions, startDate);
   const printMonths = useMemo(() => getPrintMonths(startDate, calendarEvents), [startDate, calendarEvents]);
@@ -237,6 +242,23 @@ export function App() {
     setIsNewCalendarConfirmOpen(false);
   };
 
+  // Moving the start date moves every event anchored to it, so references
+  // that name a recurrence instance by its date have to be re-pointed at the
+  // instance's new date or they stop resolving and vanish from the calendar.
+  const handleStartDateChange = (newStartDate: string) => {
+    setEventDefinitions(prev => remapInstanceReferences(prev, startDate, newStartDate));
+    setStartDate(newStartDate);
+  };
+
+  // Renumbering the schedule around a new day 1 sets the start date to that
+  // same day, so no event changes the date it already sits on. Pushing the
+  // remaining schedule out by the delay is a separate, ordinary start-date edit.
+  const handleApplyRebase = (newStartDate: string, definitions: EventDefinition[]) => {
+    setStartDate(newStartDate);
+    setEventDefinitions(definitions);
+    setIsRebaseModalOpen(false);
+  };
+
   const handleLoad = (loadedData: { calendarName: string, startDate: string, eventDefinitions: EventDefinition[] }) => {
     setCalendarName(loadedData.calendarName);
     setStartDate(loadedData.startDate);
@@ -254,7 +276,7 @@ export function App() {
         eventDefinitions={eventDefinitions}
         events={calendarEvents}
         startDate={startDate}
-        onStartDateChange={setStartDate}
+        onStartDateChange={handleStartDateChange}
         calendarName={calendarName}
         onCalendarNameChange={setCalendarName}
         onRemoveEventDefinition={handleDeleteEventDefinition}
@@ -262,6 +284,7 @@ export function App() {
         onPermanentDeleteEventDefinition={handlePermanentDeleteEventDefinition}
         onEditEventDefinition={handleEditEventDefinition}
         onRequestNewCalendar={() => setIsNewCalendarConfirmOpen(true)}
+        onRequestRebase={() => setIsRebaseModalOpen(true)}
       />
 
       <div className={`main-content${printMonths ? ' print-multipage-active' : ''}`}>
@@ -307,6 +330,16 @@ export function App() {
           onCancel={() => setIsNewCalendarConfirmOpen(false)}
         />
       )}
+
+      {/* Rebase Start Date Modal */}
+      <RebaseStartDateModal
+        isOpen={isRebaseModalOpen}
+        startDate={startDate}
+        eventDefinitions={eventDefinitions}
+        events={calendarEvents}
+        onCancel={() => setIsRebaseModalOpen(false)}
+        onApply={handleApplyRebase}
+      />
 
       {/* Edit Event Modal */}
       {isEditModalOpen && (

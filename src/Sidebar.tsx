@@ -23,6 +23,7 @@ interface SidebarProps {
     onPermanentDeleteEventDefinition: (id: string) => void;
     onEditEventDefinition: (definition: EventDefinition) => void;
     onRequestNewCalendar: () => void;
+    onRequestRebase: () => void;
 }
 
 export function Sidebar({
@@ -40,7 +41,8 @@ export function Sidebar({
     onRestoreEventDefinition,
     onPermanentDeleteEventDefinition,
     onEditEventDefinition, // New prop
-    onRequestNewCalendar
+    onRequestNewCalendar,
+    onRequestRebase
 }: SidebarProps) {
     return (
         <div className={`sidebar-container ${isOpen ? 'open' : 'closed'}`}>
@@ -67,7 +69,18 @@ export function Sidebar({
                         />
                     </div>
                     <div className="top-level-form-group">
-                        <label htmlFor="start-date">Start Date</label>
+                        <label htmlFor="start-date">
+                            Start Date
+                            <button
+                                type="button"
+                                onClick={onRequestRebase}
+                                className="new-calendar-button"
+                                disabled={!startDate}
+                                title="Drop everything before a day and make that day the new day 1"
+                            >
+                                New Day 1
+                            </button>
+                        </label>
                         <input 
                             type="date" 
                             id="start-date"
@@ -78,7 +91,7 @@ export function Sidebar({
                 </div>
 
                 <div className="sidebar-content">
-                    <CollapsibleSection title="Single Event" initialOpen={true}>
+                    <CollapsibleSection title="Single Event">
                         <SingleEventForm 
                             onAddEventDefinition={onAddEventDefinition}
                             events={events}
@@ -86,7 +99,7 @@ export function Sidebar({
                         />
                     </CollapsibleSection>
 
-                    <CollapsibleSection title="Recurring Event">
+                    <CollapsibleSection title="Recurring Event" initialOpen={true}>
                         <RecurringEventForm 
                             onAddEventDefinition={onAddEventDefinition}
                             eventDefinitions={eventDefinitions}

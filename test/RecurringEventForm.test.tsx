@@ -246,3 +246,26 @@ describe('RecurringEventForm Component', () => {
     );
   });
 });
+
+describe('day-number bounds', () => {
+  const renderForm = () =>
+    render(<RecurringEventForm onAddEventDefinition={jest.fn()} eventDefinitions={[]} />);
+
+  it('bounds the protocol day fields', () => {
+    renderForm();
+    fireEvent.change(screen.getByLabelText('Date Type'), { target: { value: 'relative-start-window' } });
+    for (const label of ['Start Day (protocol day)', 'End Day (protocol day)']) {
+      const field = screen.getByLabelText(label);
+      expect(field).toHaveAttribute('min', '1');
+      expect(field).toHaveAttribute('max', '3650');
+    }
+  });
+
+  it('clamps a typed day past the cap instead of storing it', () => {
+    renderForm();
+    fireEvent.change(screen.getByLabelText('Date Type'), { target: { value: 'relative-start-window' } });
+    const endDay = screen.getByLabelText('End Day (protocol day)');
+    fireEvent.change(endDay, { target: { value: '999999999' } });
+    expect(endDay).toHaveValue(3650);
+  });
+});

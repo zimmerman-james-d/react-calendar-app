@@ -8,6 +8,13 @@ const dayMap: { [key: number]: string } = {
   0: 'Sun', 1: 'Mon', 2: 'Tue', 3: 'Wed', 4: 'Thu', 5: 'Fri', 6: 'Sat'
 };
 
+const noopHandlers = {
+  onRemoveEventDefinition: jest.fn(),
+  onRestoreEventDefinition: jest.fn(),
+  onPermanentDeleteEventDefinition: jest.fn(),
+  onEditEventDefinition: jest.fn(),
+};
+
 describe('EventList Component', () => {
   const mockonRemoveEventDefinition = jest.fn();
   const mockOnRestoreEventDefinition = jest.fn();
